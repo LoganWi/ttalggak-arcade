@@ -269,7 +269,9 @@
 
     <canvas id="gameCanvas"></canvas>
 
-    <script>
+    <script type="module">
+        import { trackPlayCount } from "../../api-playcount.js";
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
@@ -581,6 +583,8 @@
         function popTissue(vx, vy) {
             if (isGameOver) return;
             score++;
+            if (score === 1) trackPlayCount("tissue-pull");
+
             updateAutoSuggestVisibility();
             const remaining = MAX_TISSUES - score;
             scoreElement.innerText = `남은 티슈: ${remaining}장`;

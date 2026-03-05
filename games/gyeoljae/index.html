@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,22 +8,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@latest/neodgm/style.css" rel="stylesheet">
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #000; 
+            background-color: #000;
             touch-action: none;
             font-family: 'NeoDunggeunmo', monospace;
         }
-        
+
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            object-fit: contain; 
+            object-fit: contain;
             image-rendering: -moz-crisp-edges;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
@@ -40,13 +42,13 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 2rem;
-            z-index: 30; 
+            z-index: 30;
         }
-        
+
         .pointer-events-auto {
             pointer-events: auto;
         }
-        
+
         .pixel-btn {
             background-color: #ef4444;
             color: #fff;
@@ -57,12 +59,12 @@
             text-transform: uppercase;
             transition: transform 0.1s;
         }
-        
+
         .pixel-btn:active {
             transform: translate(2px, 2px);
             box-shadow: 2px 2px 0 #000;
         }
-        
+
         .pixel-text {
             text-shadow: 3px 3px 0 #000;
         }
@@ -80,6 +82,7 @@
             display: inline-block;
             text-decoration: none;
         }
+
         #home-btn:active {
             transform: translate(2px, 2px);
             box-shadow: 2px 2px 0 #000;
@@ -119,6 +122,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <canvas id="gameCanvas"></canvas>
@@ -135,13 +139,14 @@
                 <h1 class="text-3xl md:text-5xl text-yellow-400 tracking-tighter pixel-text">
                     결재해 주세요!
                 </h1>
-                <p id="instruction" class="text-black mt-4 text-sm md:text-base animate-pulse" style="text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">
+                <p id="instruction" class="text-black mt-4 text-sm md:text-base animate-pulse"
+                    style="text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">
                     👇 결재판을 아래로 당겨서 날려버리세요!
                 </p>
             </div>
             <div style="width: 80px;"></div>
         </div>
-        
+
         <div class="flex justify-center mb-16 pointer-events-auto">
             <button id="resetBtn" class="hidden pixel-btn text-xl">
                 RESTART
@@ -149,7 +154,9 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { trackPlayCount } from "../../api-playcount.js";
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const resetBtn = document.getElementById('resetBtn');
@@ -157,18 +164,18 @@
         const failOverlay = document.getElementById('fail-overlay');
         const failDescText = document.getElementById('fail-desc-text');
 
-        const INTERNAL_HEIGHT = 360; 
+        const INTERNAL_HEIGHT = 360;
         let width, height;
-        
+
         let state = 'idle'; // idle, flying, exploded, missed
         let failMessage = '';
-        
-        const FOCAL_LENGTH = 350; 
-        const GRAVITY = 1.2;      
+
+        const FOCAL_LENGTH = 350;
+        const GRAVITY = 1.2;
         const GRAVITY_PAPER = 0.2;
         const AIR_FRICTION = 0.96;
-        const FLOOR_Y = -120;     
-        const CEILING_Y = 350; 
+        const FLOOR_Y = -120;
+        const CEILING_Y = 350;
 
         function project(x, y, z) {
             const scale = FOCAL_LENGTH / Math.max(1, FOCAL_LENGTH + z);
@@ -182,7 +189,7 @@
         let desk;
         let wall;
         let sideDesks = [];
-        let cabinets = []; 
+        let cabinets = [];
         let papers = [];
         let particles = [];
         let plant;
@@ -195,7 +202,7 @@
             canvas.width = width;
             canvas.height = height;
             ctx.imageSmoothingEnabled = false;
-            if(state === 'idle' && !folder) initGame();
+            if (state === 'idle' && !folder) initGame();
         }
         window.addEventListener('resize', resize);
 
@@ -203,16 +210,16 @@
             constructor() { this.z = 2500; }
             draw() {
                 let p = project(0, 0, this.z);
-                if(p.scale <= 0) return;
+                if (p.scale <= 0) return;
                 ctx.save();
                 ctx.translate(p.sx, p.sy);
                 ctx.scale(p.scale, p.scale);
-                ctx.fillStyle = '#7a96b4'; 
-                ctx.fillRect(-3000, -500, 6000, 620); 
+                ctx.fillStyle = '#7a96b4';
+                ctx.fillRect(-3000, -500, 6000, 620);
                 ctx.fillStyle = '#4c647c';
-                ctx.fillRect(-1200, -400, 2400, 450); 
-                ctx.fillStyle = '#a0e4fa'; 
-                ctx.fillRect(-1160, -370, 2320, 390); 
+                ctx.fillRect(-1200, -400, 2400, 450);
+                ctx.fillStyle = '#a0e4fa';
+                ctx.fillRect(-1160, -370, 2320, 390);
                 ctx.save();
                 ctx.beginPath();
                 ctx.rect(-1160, -370, 2320, 390);
@@ -238,7 +245,7 @@
                 ctx.fillRect(-700, -280, 100, 30);
                 ctx.fillRect(300, -300, 250, 40);
                 ctx.fillRect(350, -340, 150, 40);
-                ctx.restore(); 
+                ctx.restore();
                 ctx.fillStyle = '#394d63';
                 ctx.fillRect(-20, -400, 40, 450);
                 ctx.fillRect(-1200, -100, 2400, 20);
@@ -249,8 +256,8 @@
         class DisplayCabinet {
             constructor(x, z) {
                 this.x = x;
-                this.y = FLOOR_Y; 
-                this.z = z; 
+                this.y = FLOOR_Y;
+                this.z = z;
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -260,8 +267,8 @@
                 ctx.scale(p.scale, p.scale);
                 ctx.lineWidth = 6;
                 ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#450a0a'; 
-                ctx.fillRect(0, -500, 800, 500); 
+                ctx.fillStyle = '#450a0a';
+                ctx.fillRect(0, -500, 800, 500);
                 ctx.strokeRect(0, -500, 800, 500);
                 ctx.fillStyle = '#2e0707';
                 ctx.fillRect(20, -350, 760, 20); ctx.strokeRect(20, -350, 760, 20);
@@ -272,21 +279,21 @@
                 ctx.fillStyle = '#b45309'; ctx.fillRect(250, -460, 140, 110); ctx.strokeRect(250, -460, 140, 110);
                 ctx.fillStyle = '#fef3c7'; ctx.fillRect(270, -440, 100, 70);
                 ctx.fillStyle = '#ef4444'; ctx.fillRect(330, -400, 20, 20);
-                ctx.fillStyle = '#f59e0b'; 
+                ctx.fillStyle = '#f59e0b';
                 ctx.beginPath(); ctx.moveTo(550, -370); ctx.lineTo(500, -460); ctx.lineTo(600, -460); ctx.fill(); ctx.stroke();
                 ctx.beginPath(); ctx.arc(550, -460, 50, 0, Math.PI, false); ctx.fill(); ctx.stroke();
                 ctx.fillStyle = '#78350f'; ctx.fillRect(510, -370, 80, 20); ctx.strokeRect(510, -370, 80, 20);
-                ctx.fillStyle = 'rgba(253, 230, 138, 0.6)'; 
+                ctx.fillStyle = 'rgba(253, 230, 138, 0.6)';
                 ctx.fillRect(150, -330, 120, 130); ctx.strokeRect(150, -330, 120, 130);
                 ctx.fillStyle = '#ef4444'; ctx.fillRect(180, -350, 60, 20); ctx.strokeRect(180, -350, 60, 20);
-                ctx.fillStyle = '#d97706'; 
+                ctx.fillStyle = '#d97706';
                 ctx.beginPath(); ctx.moveTo(210, -210); ctx.lineTo(180, -260); ctx.lineTo(220, -310); ctx.lineTo(240, -250); ctx.fill();
                 ctx.fillStyle = '#0f172a'; ctx.fillRect(400, -320, 70, 120); ctx.strokeRect(400, -320, 70, 120);
-                ctx.fillStyle = '#38bdf8'; 
+                ctx.fillStyle = '#38bdf8';
                 ctx.beginPath(); ctx.moveTo(400, -240); ctx.lineTo(470, -260); ctx.lineTo(470, -220); ctx.lineTo(400, -200); ctx.fill();
                 ctx.fillStyle = '#d97706'; ctx.fillRect(425, -340, 20, 20);
-                ctx.fillStyle = '#854d0e'; 
-                ctx.beginPath(); ctx.arc(600, -250, 50, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#854d0e';
+                ctx.beginPath(); ctx.arc(600, -250, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.fillRect(585, -330, 30, 40); ctx.strokeRect(585, -330, 30, 40);
                 ctx.fillStyle = '#fef08a'; ctx.fillRect(580, -270, 40, 20);
                 ctx.fillStyle = '#000'; ctx.font = "bold 16px 'NeoDunggeunmo'"; ctx.fillText("X.O", 583, -255);
@@ -296,7 +303,7 @@
                 ctx.fillStyle = '#166534'; ctx.fillRect(210, -120, 40, 120); ctx.strokeRect(210, -120, 40, 120);
                 ctx.fillStyle = '#94a3b8'; ctx.fillRect(450, -150, 250, 150); ctx.strokeRect(450, -150, 250, 150);
                 ctx.fillStyle = '#475569'; ctx.fillRect(470, -130, 210, 110); ctx.strokeRect(470, -130, 210, 110);
-                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(520, -75, 20, 0, Math.PI*2); ctx.fill(); ctx.stroke(); 
+                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(520, -75, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.fillRect(600, -85, 40, 20); ctx.strokeRect(600, -85, 40, 20);
                 ctx.restore();
             }
@@ -304,7 +311,7 @@
 
         class Plant {
             constructor() {
-                this.x = -450; this.y = FLOOR_Y; this.z = 1850; 
+                this.x = -450; this.y = FLOOR_Y; this.z = 1850;
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -312,17 +319,17 @@
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
                 ctx.lineWidth = 6; ctx.strokeStyle = '#000';
                 ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.moveTo(-40, 0); ctx.lineTo(40, 0); ctx.lineTo(50, -100); ctx.lineTo(-50, -100); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(0, -150, 60, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(-50, -180, 50, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(50, -170, 55, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, -220, 50, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(0, -150, 60, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(-50, -180, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(50, -170, 55, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, -220, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.restore();
             }
         }
 
         class GolfBag {
             constructor() {
-                this.x = 650; this.y = FLOOR_Y; this.z = 2300; 
+                this.x = 650; this.y = FLOOR_Y; this.z = 2300;
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -408,12 +415,12 @@
                 ctx.fillStyle = '#a0aec0'; ctx.beginPath(); ctx.moveTo(-60, -60); ctx.lineTo(60, -60); ctx.lineTo(0, 50); ctx.closePath(); ctx.fill(); ctx.stroke();
                 ctx.fillStyle = '#fbe2b1'; ctx.fillRect(-110, -200, 220, 150); ctx.strokeRect(-110, -200, 220, 150);
                 ctx.strokeRect(-80, -50, 160, 10);
-                ctx.fillStyle = '#6e4f3a'; ctx.fillRect(-120, -230, 240, 50); ctx.strokeRect(-120, -230, 240, 50); 
+                ctx.fillStyle = '#6e4f3a'; ctx.fillRect(-120, -230, 240, 50); ctx.strokeRect(-120, -230, 240, 50);
                 ctx.fillRect(-120, -180, 20, 40); ctx.fillRect(100, -180, 20, 40); ctx.fillRect(-50, -240, 100, 20);
                 if (this.hit) {
                     ctx.fillStyle = '#fff'; ctx.fillRect(-70, -160, 40, 40); ctx.strokeRect(-70, -160, 40, 40);
                     ctx.fillRect(30, -160, 40, 40); ctx.strokeRect(30, -160, 40, 40);
-                    ctx.fillStyle = '#000'; ctx.fillRect(-60, -150, 20, 20); ctx.fillRect(40, -150, 20, 20); 
+                    ctx.fillStyle = '#000'; ctx.fillRect(-60, -150, 20, 20); ctx.fillRect(40, -150, 20, 20);
                     ctx.fillRect(-30, -90, 60, 40);
                     ctx.fillStyle = '#60a5fa'; ctx.fillRect(140, -220, 20, 20); ctx.strokeRect(140, -220, 20, 20);
                 } else {
@@ -454,23 +461,23 @@
                 let p = project(this.x, this.y, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.rotate(this.rotation); ctx.scale(p.scale, p.scale);
-                ctx.lineWidth = 6; ctx.strokeStyle = '#000'; ctx.fillStyle = '#111'; 
-                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
+                ctx.lineWidth = 6; ctx.strokeStyle = '#000'; ctx.fillStyle = '#111';
+                ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h); ctx.strokeRect(-this.w / 2, -this.h / 2, this.w, this.h);
                 ctx.strokeStyle = '#444'; ctx.lineWidth = 4; ctx.setLineDash([8, 8]);
-                ctx.strokeRect(-this.w/2 + 6, -this.h/2 + 6, this.w - 12, this.h - 12); ctx.setLineDash([]);
+                ctx.strokeRect(-this.w / 2 + 6, -this.h / 2 + 6, this.w - 12, this.h - 12); ctx.setLineDash([]);
                 ctx.fillStyle = '#fbbf24'; ctx.font = `${this.w * 0.3}px 'NeoDunggeunmo'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('결재', 0, -this.h * 0.1);
-                ctx.fillStyle = '#222'; ctx.fillRect(-this.w*0.4, this.h*0.2, this.w*0.8, this.h*0.2);
+                ctx.fillStyle = '#222'; ctx.fillRect(-this.w * 0.4, this.h * 0.2, this.w * 0.8, this.h * 0.2);
                 ctx.restore();
             }
             update() {
                 if (state === 'flying' || state === 'missed') {
-                    this.vy -= GRAVITY; 
+                    this.vy -= GRAVITY;
                     this.x += this.vx; this.y += this.vy; this.z += this.vz; this.rotation += this.rv;
-                    
-                    if (this.y < FLOOR_Y) { 
-                        this.y = FLOOR_Y; 
+
+                    if (this.y < FLOOR_Y) {
+                        this.y = FLOOR_Y;
                         this.vy = 0;
-                        
+
                         if (state === 'flying') {
                             triggerFail();
                         }
@@ -479,12 +486,12 @@
                     if (state === 'flying') {
                         if (this.z >= boss.z - 150 && this.z <= boss.z + 150) {
                             let dist = Math.sqrt(Math.pow(this.x - boss.x, 2) + Math.pow(this.y - boss.y, 2));
-                            if (dist < boss.radius * 1.5) { 
-                                explodeFolder(this.x, this.y, this.z, this.vx, this.vy, this.vz); 
+                            if (dist < boss.radius * 1.5) {
+                                explodeFolder(this.x, this.y, this.z, this.vx, this.vy, this.vz);
                                 return;
                             }
                         }
-                        
+
                         if (this.z > boss.z + 300) {
                             triggerFail();
                         }
@@ -503,7 +510,7 @@
                 "부장님 근처에도 못 갔습니다.\n다시 던져서 체면 좀 살려보시죠?"
             ];
             failMessage = failMessages[Math.floor(Math.random() * failMessages.length)];
-            
+
             failDescText.innerText = failMessage;
             failOverlay.classList.add('show');
             resetBtn.classList.remove('hidden');
@@ -540,13 +547,13 @@
                 let scaleY = this.y <= FLOOR_Y + 5 ? 0.3 : 1;
                 ctx.scale(scaleX * p.scale, scaleY * p.scale);
                 ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
-                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
-                ctx.fillStyle = '#aaa'; for(let i=0; i<4; i++) ctx.fillRect(-this.w*0.3, -this.h*0.3 + i*15, this.w*0.6, 6);
+                ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h); ctx.strokeRect(-this.w / 2, -this.h / 2, this.w, this.h);
+                ctx.fillStyle = '#aaa'; for (let i = 0; i < 4; i++) ctx.fillRect(-this.w * 0.3, -this.h * 0.3 + i * 15, this.w * 0.6, 6);
                 ctx.fillStyle = '#ef4444'; ctx.fillRect(10, 20, 20, 20);
                 ctx.restore();
             }
         }
-        
+
         class Particle {
             constructor(x, y, z) {
                 this.x = x; this.y = y; this.z = z;
@@ -557,12 +564,12 @@
             }
             update() { this.vy -= GRAVITY; this.x += this.vx; this.y += this.vy; this.z += this.vz; this.life -= 0.02; }
             draw() {
-                if(this.life <= 0) return;
+                if (this.life <= 0) return;
                 let p = project(this.x, this.y, this.z);
-                if(p.scale > 0) {
+                if (p.scale > 0) {
                     ctx.fillStyle = this.color; ctx.globalAlpha = this.life;
-                    let s = this.size * p.scale; ctx.fillRect(p.sx - s/2, p.sy - s/2, s, s);
-                    ctx.lineWidth = 2 * p.scale; ctx.strokeStyle = '#000'; ctx.strokeRect(p.sx - s/2, p.sy - s/2, s, s);
+                    let s = this.size * p.scale; ctx.fillRect(p.sx - s / 2, p.sy - s / 2, s, s);
+                    ctx.lineWidth = 2 * p.scale; ctx.strokeStyle = '#000'; ctx.strokeRect(p.sx - s / 2, p.sy - s / 2, s, s);
                     ctx.globalAlpha = 1.0;
                 }
             }
@@ -581,6 +588,7 @@
 
         function explodeFolder(x, y, z, vx, vy, vz) {
             state = 'exploded'; boss.hit = true; boss.reactionTimer = 100; instruction.classList.add('hidden');
+            trackPlayCount("gyeoljae");
             for (let i = 0; i < 15; i++) papers.push(new Paper(x, y, z, vx, vy, vz));
             for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, boss.z));
             setTimeout(() => { resetBtn.classList.remove('hidden'); }, 2000);
@@ -599,20 +607,20 @@
             const pos = getCanvasPos(e);
             let p = project(folder.x, folder.y, folder.z);
             let hitW = folder.w * p.scale * 2.0; let hitH = folder.h * p.scale * 2.0;
-            if (Math.abs(pos.x - p.sx) < hitW/2 && Math.abs(pos.y - p.sy) < hitH/2) { isDragging = true; startX = pos.x; startY = pos.y; dragDx = 0; dragDy = 0; }
+            if (Math.abs(pos.x - p.sx) < hitW / 2 && Math.abs(pos.y - p.sy) < hitH / 2) { isDragging = true; startX = pos.x; startY = pos.y; dragDx = 0; dragDy = 0; }
         }
         function handleMove(e) {
             if (isDragging && state === 'idle') {
                 const pos = getCanvasPos(e);
                 let dx = pos.x - startX; let dy = pos.y - startY; if (dy < 0) dy = 0;
-                const MAX_DRAG = 120; let dist = Math.sqrt(dx*dx + dy*dy);
+                const MAX_DRAG = 120; let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist > MAX_DRAG) { dx = (dx / dist) * MAX_DRAG; dy = (dy / dist) * MAX_DRAG; }
                 dragDx = dx; dragDy = dy; folder.x = folder.baseX + dx * 1.5; folder.y = folder.baseY - dy * 0.8; folder.z = folder.baseZ - dy * 3; folder.rotation = dx * 0.002;
             }
         }
         function handleEnd(e) {
             if (!isDragging || state !== 'idle') return;
-            isDragging = false; let dist = Math.sqrt(dragDx*dragDx + dragDy*dragDy);
+            isDragging = false; let dist = Math.sqrt(dragDx * dragDx + dragDy * dragDy);
             if (dist > 20 && dragDy > 0) { state = 'flying'; folder.vx = -dragDx * 0.3; folder.vy = dragDy * 0.6; folder.vz = dragDy * 2.2; folder.rv = (Math.random() - 0.5) * 0.3; instruction.classList.add('hidden'); }
             else { folder.x = folder.baseX; folder.y = folder.baseY; folder.z = folder.baseZ; folder.rotation = 0; }
             dragDx = 0; dragDy = 0;
@@ -622,48 +630,48 @@
             if (!isDragging || state !== 'idle' || dragDy <= 5) return;
             let simX = folder.x; let simY = folder.y; let simZ = folder.z;
             let simVx = -dragDx * 0.3; let simVy = dragDy * 0.6; let simVz = dragDy * 2.2;
-            ctx.fillStyle = '#ef4444'; 
+            ctx.fillStyle = '#ef4444';
             for (let i = 0; i < 60; i++) {
                 simVy -= GRAVITY; simX += simVx; simY += simVy; simZ += simVz;
                 if (i % 3 === 0) {
                     let currP = project(simX, simY, simZ); if (currP.scale < 0) break;
-                    let dotSize = 8 * currP.scale; ctx.fillRect(currP.sx - dotSize/2, currP.sy - dotSize/2, dotSize, dotSize);
+                    let dotSize = 8 * currP.scale; ctx.fillRect(currP.sx - dotSize / 2, currP.sy - dotSize / 2, dotSize, dotSize);
                 }
                 if (simZ >= boss.z) {
                     let hitP = project(simX, simY, simZ); ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4 * hitP.scale;
-                    let markW = 100 * hitP.scale; let markH = 40 * hitP.scale; ctx.strokeRect(hitP.sx - markW/2, hitP.sy - markH/2, markW, markH);
-                    return; 
+                    let markW = 100 * hitP.scale; let markH = 40 * hitP.scale; ctx.strokeRect(hitP.sx - markW / 2, hitP.sy - markH / 2, markW, markH);
+                    return;
                 }
             }
         }
 
         function drawRoomEnvironment() {
-            ctx.fillStyle = '#829bb5'; ctx.fillRect(0, 0, width, height/2);
+            ctx.fillStyle = '#829bb5'; ctx.fillRect(0, 0, width, height / 2);
             ctx.strokeStyle = '#627b95'; ctx.lineWidth = 2;
-            for(let x = -4000; x <= 4000; x += 400) {
+            for (let x = -4000; x <= 4000; x += 400) {
                 let p1 = project(x, CEILING_Y, -500); let p2 = project(x, CEILING_Y, 4000);
-                if(p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
-            for(let z = -200; z <= 4000; z += 400) {
+            for (let z = -200; z <= 4000; z += 400) {
                 let p1 = project(-4000, CEILING_Y, z); let p2 = project(4000, CEILING_Y, z);
-                if(p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
-            ctx.fillStyle = '#5180a5'; ctx.fillRect(0, height/2, width, height/2);
+            ctx.fillStyle = '#5180a5'; ctx.fillRect(0, height / 2, width, height / 2);
             ctx.strokeStyle = '#396383'; ctx.lineWidth = 2;
-            for(let x = -4000; x <= 4000; x += 300) {
+            for (let x = -4000; x <= 4000; x += 300) {
                 let p1 = project(x, FLOOR_Y, -500); let p2 = project(x, FLOOR_Y, 4000);
-                if(p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
-            for(let z = -200; z <= 4000; z += 300) {
+            for (let z = -200; z <= 4000; z += 300) {
                 let p1 = project(-4000, FLOOR_Y, z); let p2 = project(4000, FLOOR_Y, z);
-                if(p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
             let gmTL = project(600, FLOOR_Y, 2400); let gmTR = project(800, FLOOR_Y, 2400);
             let gmBR = project(800, FLOOR_Y, 1600); let gmBL = project(600, FLOOR_Y, 1600);
             if (gmBL.scale > 0 && gmTL.scale > 0) {
                 ctx.save(); ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(gmTL.sx, gmTL.sy); ctx.lineTo(gmTR.sx, gmTR.sy); ctx.lineTo(gmBR.sx, gmBR.sy); ctx.lineTo(gmBL.sx, gmBL.sy); ctx.closePath(); ctx.fill();
                 let hole = project(700, FLOOR_Y, 2250); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(hole.sx, hole.sy, 20 * hole.scale, 6 * hole.scale, 0, 0, Math.PI * 2); ctx.fill();
-                let ball = project(700, FLOOR_Y, 1750); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                let ball = project(700, FLOOR_Y, 1750); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.restore();
             }
         }
@@ -671,11 +679,11 @@
         canvas.addEventListener('mousedown', handleStart);
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(e); }, {passive: false});
-        window.addEventListener('touchmove', (e) => { if (e.target !== resetBtn) e.preventDefault(); handleMove(e); }, {passive: false});
-        window.addEventListener('touchend', (e) => { if (e.target !== resetBtn) e.preventDefault(); handleEnd(e); }, {passive: false});
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(e); }, { passive: false });
+        window.addEventListener('touchmove', (e) => { if (e.target !== resetBtn) e.preventDefault(); handleMove(e); }, { passive: false });
+        window.addEventListener('touchend', (e) => { if (e.target !== resetBtn) e.preventDefault(); handleEnd(e); }, { passive: false });
         resetBtn.addEventListener('click', initGame);
-        resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); initGame(); }, {passive: false});
+        resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); initGame(); }, { passive: false });
 
         function animate() {
             ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, width, height);
@@ -685,8 +693,8 @@
             particles.forEach(p => p.update());
             let renderList = [];
             if (wall) renderList.push({ z: wall.z, obj: wall });
-            if (boss) renderList.push({ z: boss.z, obj: boss }); 
-            if (desk) renderList.push({ z: desk.z, obj: desk }); 
+            if (boss) renderList.push({ z: boss.z, obj: boss });
+            if (desk) renderList.push({ z: desk.z, obj: desk });
             if (plant) renderList.push({ z: plant.z, obj: plant });
             if (golfBag) renderList.push({ z: golfBag.z, obj: golfBag });
             sideDesks.forEach(sd => renderList.push({ z: sd.z, obj: sd }));
@@ -705,4 +713,5 @@
         animate();
     </script>
 </body>
+
 </html>
