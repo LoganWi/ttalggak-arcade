@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>티슈 마구마구 뽑기 — 딸깍아케이드</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            font-family: 'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            color: #333;
+        }
+
+        #score {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.7);
+        }
+
+        #instructions {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        #game-over-msg {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 44px;
+            font-weight: 900;
+            color: #ff4757;
+            text-shadow: 3px 3px 0px #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
+            pointer-events: none;
+            width: 100%;
+            z-index: 10;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -30%) scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .toggle-group {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #444;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #4A90E2;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        #reset-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background-color: #4A90E2;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+            pointer-events: auto;
+            font-family: inherit;
+        }
+
+        #reset-btn:hover {
+            background-color: #357ABD;
+            transform: scale(1.05);
+        }
+
+        #reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        #auto-suggest-btn {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 24px;
+            font-weight: 800;
+            color: #4A90E2;
+            background-color: white;
+            border: 4px solid #4A90E2;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            z-index: 5;
+            animation: floatPulse 2s infinite ease-in-out;
+            pointer-events: auto;
+            font-family: inherit;
+        }
+
+        @keyframes floatPulse {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            }
+
+            50% {
+                transform: translate(-50%, -55%) scale(1.05);
+                box-shadow: 0 15px 25px rgba(74, 144, 226, 0.4);
+            }
+        }
+
+        /* 뒤로가기 버튼 */
+        #back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #555;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            pointer-events: auto;
+            font-family: inherit;
+            z-index: 20;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #back-btn:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        #back-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ui-layer">
+        <p id="score">남은 티슈: 20장</p>
+        <p id="instructions">위로 빠르게 스와이프하여 티슈를 뽑으세요!</p>
+
+        <div class="toggle-group">
+            <div class="toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="auto-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>연속 뽑기</span>
+            </div>
+
+            <div class="toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="fan-toggle">
+                    <span class="slider fan-slider"></span>
+                </label>
+                <span>선풍기 모드</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 뒤로가기 버튼 -->
+    <a href="/" id="back-btn">🕹️ 게임 목록</a>
+
+    <div id="game-over-msg">
+        다 썼어요!<br>리필해주세요~ 🎉
+        <button id="reset-btn">다시 뽑으러가기</button>
+    </div>
+
+    <button id="auto-suggest-btn">연속으로 뽑을까요? ✨</button>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let score = 0;
+        const MAX_TISSUES = 20;
+        let isGameOver = false;
+        let tissues = [];
+        let particles = [];
+
+        let isAutoMode = false;
+        let isAutoPopping = false;
+        let isFanMode = false;
+
+        const autoSuggestBtn = document.getElementById('auto-suggest-btn');
+        const autoToggle = document.getElementById('auto-toggle');
+        const fanToggle = document.getElementById('fan-toggle');
+
+        function updateAutoSuggestVisibility() {
+            if (score === 0 && !isAutoMode) {
+                autoSuggestBtn.style.display = 'block';
+            } else {
+                autoSuggestBtn.style.display = 'none';
+            }
+        }
+
+        autoSuggestBtn.addEventListener('click', () => {
+            isAutoMode = true;
+            autoToggle.checked = true;
+            updateAutoSuggestVisibility();
+        });
+
+        autoToggle.addEventListener('change', (e) => {
+            isAutoMode = e.target.checked;
+            updateAutoSuggestVisibility();
+        });
+
+        fanToggle.addEventListener('change', (e) => {
+            isFanMode = e.target.checked;
+            if (isFanMode) {
+                canvas.style.cursor = 'none';
+            } else {
+                canvas.style.cursor = 'default';
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            score = 0;
+            isGameOver = false;
+            isAutoPopping = false;
+            tissues = [];
+            particles = [];
+            scoreElement.innerText = `남은 티슈: ${MAX_TISSUES}장`;
+            document.getElementById('game-over-msg').style.display = 'none';
+            updateAutoSuggestVisibility();
+        });
+
+        updateAutoSuggestVisibility();
+
+        const box = {
+            width: 200,
+            height: 120,
+            x: 0,
+            y: 0,
+            color: '#4A90E2',
+            lidColor: '#357ABD',
+            holeWidth: 120,
+            holeHeight: 20,
+            offsetY: 0,
+            velocityY: 0
+        };
+
+        let isDragging = false;
+        let startY = 0;
+        let startX = 0;
+        let currentY = height / 2;
+        let currentX = width / 2;
+        let dragHistory = [];
+        let activeTissueY = 0;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            box.x = width / 2;
+            box.y = height - box.height / 2 - 20;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 25;
+                this.vy = (Math.random() - 1) * 25 - 5;
+                this.size = Math.random() * 12 + 6;
+                const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#ff69b4', '#ffffff', '#eccc68'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.angle = Math.random() * Math.PI * 2;
+                this.va = (Math.random() - 0.5) * 0.4;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.015 + 0.005;
+            }
+            update() {
+                this.vy += 0.4;
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.angle += this.va;
+                this.life -= this.decay;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size, -this.size / 2, this.size * 2, this.size);
+                ctx.restore();
+            }
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 200; i++) {
+                particles.push(new Particle(box.x, box.y + box.offsetY - box.height / 2));
+            }
+        }
+
+        class Tissue {
+            constructor(x, y, vx, vy) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.width = 140;
+                this.height = 140;
+                this.tick = Math.random() * 100;
+                this.phase = Math.random() * Math.PI * 2;
+                this.angle = (Math.random() - 0.5) * 0.5;
+                this.angularVelocity = (Math.random() - 0.5) * 0.1;
+                this.flipPhase = Math.random() * Math.PI;
+                this.flipVelocity = (Math.random() - 0.5) * 0.2;
+                this.isDead = false;
+            }
+            update() {
+                this.tick += 0.15;
+                const gravity = 0.2;
+                this.vy += gravity;
+                const apparentArea = Math.abs(Math.cos(this.flipPhase));
+                const dragFactor = 0.98 - (apparentArea * 0.08);
+                this.vy *= dragFactor;
+                this.vx *= dragFactor;
+                if (this.vy > 0) {
+                    const liftForce = apparentArea * this.vy * 0.05;
+                    this.vx += Math.sin(this.angle) * liftForce + Math.sin(this.tick * 0.5) * 0.2;
+                    this.angularVelocity += (Math.random() - 0.5) * 0.03;
+                    this.flipVelocity += (Math.random() - 0.5) * 0.03;
+                }
+                if (isFanMode) {
+                    let dx = this.x - currentX;
+                    let dy = this.y - currentY;
+                    if (Math.abs(dx) < 80 && dy < 0 && dy > -500) {
+                        let windPower = 1 - (Math.abs(dy) / 500);
+                        let upwardForce = this.vy > 0 ? 2.5 : 1.0;
+                        this.vy -= windPower * upwardForce;
+                        this.vx += (dx * 0.02) * windPower;
+                        this.angularVelocity += (Math.random() - 0.5) * 0.2 * windPower;
+                        this.flipVelocity += (Math.random() - 0.5) * 0.4 * windPower;
+                        this.tick += windPower * 2.0;
+                    }
+                }
+                this.angularVelocity *= 0.95;
+                this.flipVelocity *= 0.95;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.angle += this.angularVelocity;
+                this.flipPhase += this.flipVelocity;
+                if (this.y > height + this.height || this.x < -width || this.x > width * 2 || this.y < -height * 1.5) {
+                    this.isDead = true;
+                }
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                const scaleY = Math.cos(this.flipPhase);
+                ctx.scale(1, scaleY);
+                let w = this.width;
+                let h = this.height;
+                let wave1 = Math.sin(this.tick + this.phase) * 12;
+                let wave2 = Math.cos(this.tick * 1.3 + this.phase) * 12;
+                let wave3 = Math.sin(this.tick * 0.8 + this.phase) * 12;
+                let wave4 = Math.cos(this.tick * 1.1 + this.phase) * 12;
+                let dragY = -this.vy * 1.5;
+                dragY = Math.max(-30, Math.min(30, dragY));
+                let tl_x = -w / 2 + wave1, tl_y = -h / 2 + wave2 + dragY;
+                let tr_x = w / 2 + wave3, tr_y = -h / 2 + wave4 + dragY;
+                let br_x = w / 2 - wave1, br_y = h / 2 + wave3 + dragY;
+                let bl_x = -w / 2 - wave2, bl_y = h / 2 + wave1 + dragY;
+                let rm_x = w / 2 + wave2, rm_y = 0;
+                let lm_x = -w / 2 - wave3, lm_y = 0;
+                let foldOffset = Math.sin(this.tick * 1.5) * 20;
+                let foldDepth = Math.cos(this.tick * 1.2) * 10;
+                let ct_x = foldOffset, ct_y = -h / 2 - dragY * 0.5 + foldDepth;
+                let cb_x = foldOffset, cb_y = h / 2 - dragY * 0.5 - foldDepth;
+                ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetY = 5;
+                ctx.beginPath();
+                ctx.moveTo(ct_x, ct_y);
+                ctx.quadraticCurveTo(-w / 4 + foldOffset / 2, -h / 2 - dragY * 0.2, tl_x, tl_y);
+                ctx.quadraticCurveTo(lm_x, lm_y, bl_x, bl_y);
+                ctx.quadraticCurveTo(-w / 4 + foldOffset / 2, h / 2 - dragY * 0.2, cb_x, cb_y);
+                ctx.lineTo(ct_x, ct_y);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fill();
+                let leftShade = Math.max(0, foldOffset * 0.003);
+                ctx.fillStyle = `rgba(0, 0, 0, ${leftShade})`;
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+                ctx.beginPath();
+                ctx.moveTo(ct_x, ct_y);
+                ctx.quadraticCurveTo(w / 4 + foldOffset / 2, -h / 2 - dragY * 0.2, tr_x, tr_y);
+                ctx.quadraticCurveTo(rm_x, rm_y, br_x, br_y);
+                ctx.quadraticCurveTo(w / 4 + foldOffset / 2, h / 2 - dragY * 0.2, cb_x, cb_y);
+                ctx.lineTo(ct_x, ct_y);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fill();
+                let rightShade = Math.max(0, -foldOffset * 0.003);
+                ctx.fillStyle = `rgba(0, 0, 0, ${rightShade})`;
+                ctx.fill();
+                ctx.strokeStyle = `rgba(0, 0, 0, ${0.03 + Math.abs(foldOffset) * 0.002})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(ct_x, ct_y);
+                ctx.lineTo(cb_x, cb_y);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (isGameOver || isAutoPopping) return;
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            currentX = startX;
+            currentY = startY;
+            activeTissueY = 0;
+            dragHistory = [{ y: startY, x: startX, time: Date.now() }];
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            currentX = e.clientX;
+            currentY = e.clientY;
+            if (!isDragging) return;
+            if (currentY < startY) {
+                activeTissueY = startY - currentY;
+                if (activeTissueY > 100) activeTissueY = 100 + (activeTissueY - 100) * 0.2;
+            }
+            dragHistory.push({ y: currentY, x: currentX, time: Date.now() });
+            if (dragHistory.length > 10) dragHistory.shift();
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            if (dragHistory.length > 1) {
+                const now = Date.now();
+                const past = dragHistory[0];
+                const dt = Math.max(1, now - past.time);
+                const dy = currentY - past.y;
+                const dx = currentX - (past.x !== undefined ? past.x : currentX);
+                let velocityY = (dy / dt) * 20;
+                let velocityX = (dx / dt) * 10;
+                if (isNaN(velocityX)) velocityX = 0;
+                if (isNaN(velocityY)) velocityY = 0;
+                velocityY = Math.max(-70, velocityY);
+                velocityX = Math.max(-40, Math.min(40, velocityX));
+                if (velocityY < -15) {
+                    if (isAutoMode) {
+                        isAutoPopping = true;
+                        startAutoPopSequence(velocityX, velocityY);
+                    } else {
+                        popTissue(velocityX, velocityY);
+                    }
+                }
+            }
+            activeTissueY = 0;
+        });
+
+        function startAutoPopSequence(baseVx, baseVy) {
+            if (isGameOver || !isAutoPopping) return;
+            let randomVx = baseVx + (Math.random() - 0.5) * 8;
+            let randomVy = baseVy + (Math.random() - 0.5) * 5;
+            popTissue(randomVx, randomVy);
+            if (!isGameOver) {
+                setTimeout(() => { startAutoPopSequence(baseVx, baseVy); }, 100);
+            } else {
+                isAutoPopping = false;
+            }
+        }
+
+        function popTissue(vx, vy) {
+            if (isGameOver) return;
+            score++;
+            updateAutoSuggestVisibility();
+            const remaining = MAX_TISSUES - score;
+            scoreElement.innerText = `남은 티슈: ${remaining}장`;
+            box.velocityY = Math.max(-20, vy * 0.4);
+            const sx = box.x;
+            const sy = box.y + box.offsetY - box.height / 2;
+            tissues.push(new Tissue(sx, sy, vx, vy));
+            if (score >= MAX_TISSUES) {
+                isGameOver = true;
+                document.getElementById('game-over-msg').style.display = 'block';
+                createConfetti();
+            }
+        }
+
+        function drawBox(ctx) {
+            const bx = box.x;
+            const w = box.width;
+            const h = box.height;
+            const shadowY = box.y + h / 2;
+            ctx.fillStyle = `rgba(0,0,0,${Math.max(0.05, 0.2 + box.offsetY * 0.005)})`;
+            ctx.beginPath();
+            ctx.ellipse(bx, shadowY, Math.max(10, w / 2 + 10 + box.offsetY * 0.3), Math.max(5, 15 + box.offsetY * 0.1), 0, 0, Math.PI * 2);
+            ctx.fill();
+            const by = box.y + box.offsetY;
+            ctx.fillStyle = box.color;
+            ctx.fillRect(bx - w / 2, by - h / 2, w, h);
+            ctx.fillStyle = box.lidColor;
+            ctx.beginPath();
+            ctx.moveTo(bx - w / 2, by - h / 2);
+            ctx.lineTo(bx + w / 2, by - h / 2);
+            ctx.lineTo(bx + w / 2 - 20, by - h / 2 - 30);
+            ctx.lineTo(bx - w / 2 + 20, by - h / 2 - 30);
+            ctx.fill();
+            ctx.fillStyle = '#2A69A4';
+            ctx.beginPath();
+            ctx.moveTo(bx - w / 2, by - h / 2);
+            ctx.lineTo(bx - w / 2 + 20, by - h / 2 - 30);
+            ctx.lineTo(bx - w / 2 + 20, by + h / 2 - 30);
+            ctx.lineTo(bx - w / 2, by + h / 2);
+            ctx.fill();
+            ctx.fillStyle = '#1A4060';
+            ctx.beginPath();
+            ctx.ellipse(bx, by - h / 2 - 15, box.holeWidth / 2, box.holeHeight / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawActiveTissue(ctx) {
+            if (isGameOver) return;
+            if (activeTissueY > 0) {
+                const bx = box.x;
+                const by = box.y + box.offsetY - box.height / 2 - 15;
+                ctx.fillStyle = 'white';
+                ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                ctx.shadowBlur = 5;
+                ctx.beginPath();
+                let pinchX = bx + (currentX - startX) * 0.1;
+                let pinchY = by - activeTissueY;
+                ctx.moveTo(bx - 30, by);
+                ctx.quadraticCurveTo(bx - 40, by - activeTissueY * 0.5, pinchX - 20, pinchY);
+                ctx.lineTo(pinchX + 20, pinchY);
+                ctx.quadraticCurveTo(bx + 40, by - activeTissueY * 0.5, bx + 30, by);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+                ctx.beginPath();
+                ctx.moveTo(bx - 10, by);
+                ctx.lineTo(pinchX - 5, pinchY);
+                ctx.moveTo(bx + 10, by);
+                ctx.lineTo(pinchX + 5, pinchY);
+                ctx.stroke();
+                ctx.shadowColor = 'transparent';
+            } else {
+                const bx = box.x;
+                const by = box.y + box.offsetY - box.height / 2 - 15;
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.moveTo(bx - 30, by);
+                ctx.quadraticCurveTo(bx, by - 40, bx + 30, by);
+                ctx.fill();
+            }
+        }
+
+        function drawFan(ctx, x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = '#888';
+            ctx.fillRect(-3, 15, 6, 20);
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.ellipse(0, 35, 15, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(0, 0, 18, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(240, 240, 240, 0.9)';
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#999';
+            ctx.stroke();
+            ctx.beginPath();
+            const time = Date.now() * 0.04;
+            ctx.moveTo(0, 0); ctx.lineTo(Math.cos(time) * 14, Math.sin(time) * 14);
+            ctx.moveTo(0, 0); ctx.lineTo(Math.cos(time + Math.PI * 2 / 3) * 14, Math.sin(time + Math.PI * 2 / 3) * 14);
+            ctx.moveTo(0, 0); ctx.lineTo(Math.cos(time + Math.PI * 4 / 3) * 14, Math.sin(time + Math.PI * 4 / 3) * 14);
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#4A90E2';
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(0, 0, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#555';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 3; i++) {
+                let offset = (Date.now() * 0.15 + i * 15) % 40;
+                let opacity = 1 - (offset / 40);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.8})`;
+                ctx.beginPath();
+                ctx.moveTo(-12 + i * 12, -20 - offset);
+                ctx.lineTo(-12 + i * 12, -35 - offset);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            let targetOffsetY = 0;
+            if (activeTissueY > 0 && !isGameOver) {
+                targetOffsetY = -activeTissueY * 0.15;
+            }
+            let force = (targetOffsetY - box.offsetY) * 0.3;
+            box.velocityY += force;
+            box.velocityY *= 0.8;
+            box.offsetY += box.velocityY;
+            drawBox(ctx);
+            drawActiveTissue(ctx);
+            for (let i = tissues.length - 1; i >= 0; i--) {
+                const t = tissues[i];
+                t.update();
+                t.draw(ctx);
+                if (t.isDead) tissues.splice(i, 1);
+            }
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw(ctx);
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+            if (isFanMode) {
+                drawFan(ctx, currentX, currentY);
+            }
+            requestAnimationFrame(animate);
+        }
+
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            }
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
