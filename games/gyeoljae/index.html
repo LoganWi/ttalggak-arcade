@@ -125,6 +125,53 @@
             text-shadow: 2px 2px 0 #000;
             padding: 0 1rem;
         }
+
+        #hit-bubble {
+            position: absolute;
+            display: none;
+            pointer-events: none;
+            z-index: 25;
+            transform: translate(-50%, -100%);
+            text-align: center;
+        }
+
+        #hit-bubble.show {
+            display: block;
+        }
+
+        #hit-bubble .bubble-text {
+            background: #fff;
+            border: 4px solid #000;
+            box-shadow: 3px 3px 0 #000;
+            color: #ef4444;
+            font-family: 'NeoDunggeunmo', monospace;
+            font-size: 18px;
+            padding: 10px 18px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        #hit-bubble .bubble-tail {
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 18px solid #000;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #hit-bubble .bubble-tail::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 16px solid #fff;
+        }
     </style>
 </head>
 
@@ -135,6 +182,11 @@
     <div id="fail-overlay">
         <h2 id="fail-title-text">FAIL</h2>
         <p id="fail-desc-text"></p>
+    </div>
+
+    <div id="hit-bubble">
+        <div class="bubble-text" id="hit-bubble-text"></div>
+        <div class="bubble-tail"></div>
     </div>
 
     <div id="ui-layer">
@@ -168,6 +220,8 @@
         const instruction = document.getElementById('instruction');
         const failOverlay = document.getElementById('fail-overlay');
         const failDescText = document.getElementById('fail-desc-text');
+        const hitBubble = document.getElementById('hit-bubble');
+        const hitBubbleText = document.getElementById('hit-bubble-text');
 
         const INTERNAL_HEIGHT = 360;
         let width, height;
@@ -427,12 +481,27 @@
                 }
                 ctx.save(); ctx.translate(finalSx, finalSy); ctx.scale(p.scale, p.scale);
                 ctx.lineWidth = 8; ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#c41a1a'; ctx.beginPath(); ctx.roundRect(-240, -280, 480, 450, 30); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#941111'; ctx.beginPath(); ctx.roundRect(-220, -260, 440, 410, 20); ctx.fill();
-                ctx.fillStyle = '#3c586e'; ctx.fillRect(-180, -60, 360, 220); ctx.strokeRect(-180, -60, 360, 220);
+                // 의자 등받이
+                ctx.fillStyle = '#8B0000'; ctx.fillRect(-280, -280, 560, 420, 20);
+                ctx.beginPath(); ctx.roundRect(-280, -280, 560, 420, 20); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#6b0000'; ctx.beginPath(); ctx.roundRect(-260, -260, 520, 380, 15); ctx.fill();
+                // 의자 팔걸이
+                ctx.fillStyle = '#5a3a1a'; ctx.strokeStyle = '#000'; ctx.lineWidth = 6;
+                ctx.fillRect(-290, 50, 40, 80); ctx.strokeRect(-290, 50, 40, 80);
+                ctx.fillRect(250, 50, 40, 80); ctx.strokeRect(250, 50, 40, 80);
+                ctx.fillRect(-310, 30, 80, 25); ctx.strokeRect(-310, 30, 80, 25);
+                ctx.fillRect(230, 30, 80, 25); ctx.strokeRect(230, 30, 80, 25);
+                ctx.lineWidth = 8;
+                // 상의
+                ctx.fillStyle = '#c41a1a'; ctx.beginPath(); ctx.roundRect(-240, -240, 480, 350, 30); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#941111'; ctx.beginPath(); ctx.roundRect(-220, -220, 440, 310, 20); ctx.fill();
+                // 넥타이/셔츠
+                ctx.fillStyle = '#3c586e'; ctx.fillRect(-180, -60, 360, 170); ctx.strokeRect(-180, -60, 360, 170);
                 ctx.fillStyle = '#a0aec0'; ctx.beginPath(); ctx.moveTo(-60, -60); ctx.lineTo(60, -60); ctx.lineTo(0, 50); ctx.closePath(); ctx.fill(); ctx.stroke();
+                // 얼굴
                 ctx.fillStyle = '#fbe2b1'; ctx.fillRect(-110, -200, 220, 150); ctx.strokeRect(-110, -200, 220, 150);
                 ctx.strokeRect(-80, -50, 160, 10);
+                // 머리카락
                 ctx.fillStyle = '#6e4f3a'; ctx.fillRect(-120, -230, 240, 50); ctx.strokeRect(-120, -230, 240, 50);
                 ctx.fillRect(-120, -180, 20, 40); ctx.fillRect(100, -180, 20, 40); ctx.fillRect(-50, -240, 100, 20);
                 if (this.hit) {
@@ -455,17 +524,18 @@
                     ctx.fillStyle = '#81c784'; ctx.fillRect(-180, -50, 50, 40); ctx.strokeRect(-180, -50, 50, 40);
                 }
                 ctx.restore();
-                if (this.hit) {
-                    ctx.save();
-                    // 화면 중앙 상단에 고정 표시
-                    ctx.translate(width / 2, height / 2 - 150);
-                    ctx.lineWidth = 4; ctx.strokeStyle = '#000';
-                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-180, -120); ctx.lineTo(180, -120); ctx.lineTo(180, -60); ctx.lineTo(15, -60); ctx.lineTo(0, -30); ctx.lineTo(-15, -60); ctx.lineTo(-180, -60); ctx.closePath(); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = '#ef4444'; ctx.font = `26px 'NeoDunggeunmo'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.currentHitText, 0, -88);
-                    ctx.restore();
-                }
+                // 말풍선은 HTML overlay로 처리하므로 canvas 쪽 말풍선 제거
                 if (this.hit && this.reactionTimer > 0) {
-                    this.reactionTimer--; if (this.reactionTimer <= 0) this.hit = false;
+                    // 부장님 머리 위 3D 위치를 화면 좌표로 변환해서 버블 위치 계산
+                    let headWorld = project(this.x, this.y + 260, this.z);
+                    const rect = canvas.getBoundingClientRect();
+                    const cssX = rect.left + (headWorld.sx / canvas.width) * rect.width;
+                    const cssY = rect.top + (headWorld.sy / canvas.height) * rect.height;
+                    hitBubble.style.left = cssX + 'px';
+                    hitBubble.style.top = cssY + 'px';
+                    hitBubble.classList.add('show');
+                    this.reactionTimer--;
+                    if (this.reactionTimer <= 0) { this.hit = false; hitBubble.classList.remove('show'); }
                 }
             }
         }
@@ -610,6 +680,7 @@
         function explodeFolder(x, y, z, vx, vy, vz) {
             state = 'exploded'; boss.hit = true; boss.reactionTimer = 100; instruction.classList.add('hidden');
             boss.currentHitText = boss.hitTexts[Math.floor(Math.random() * boss.hitTexts.length)];
+            hitBubbleText.innerText = boss.currentHitText;
             trackPlayCount("gyeoljae");
             // 서류 뭉치 개수도 늘림
             for (let i = 0; i < 30; i++) papers.push(new Paper(x, y, z, vx, vy, vz));
@@ -695,6 +766,35 @@
                 let hole = project(700, FLOOR_Y, 6750); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(hole.sx, hole.sy, 20 * hole.scale, 6 * hole.scale, 0, 0, Math.PI * 2); ctx.fill();
                 let ball = project(700, FLOOR_Y, 5250); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.restore();
+            }
+            // 천장 형광등
+            const lightZs = [500, 1800, 3500, 5500];
+            const lightXs = [-600, 0, 600];
+            for (let lz of lightZs) {
+                for (let lx of lightXs) {
+                    let la = project(lx - 400, CEILING_Y, lz);
+                    let lb = project(lx + 400, CEILING_Y, lz);
+                    if (la.scale > 0 && lb.scale > 0) {
+                        let lw = Math.abs(lb.sx - la.sx);
+                        let lh = Math.max(4, 12 * la.scale);
+                        let lx0 = Math.min(la.sx, lb.sx);
+                        let ly0 = la.sy - lh / 2;
+                        ctx.save();
+                        // 형광등 몸체 (회색 케이스)
+                        ctx.fillStyle = '#b0bec5'; ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 2;
+                        ctx.fillRect(lx0, ly0 - lh * 0.5, lw, lh * 1.5); ctx.strokeRect(lx0, ly0 - lh * 0.5, lw, lh * 1.5);
+                        // 형광 빛 (밝은 흰색/노란색)
+                        ctx.fillStyle = '#fffde7';
+                        ctx.fillRect(lx0 + 2, ly0, lw - 4, lh * 0.8);
+                        // 빛 번짐 효과
+                        let grad = ctx.createLinearGradient(lx0, ly0 + lh, lx0, ly0 + lh * 8);
+                        grad.addColorStop(0, 'rgba(255, 253, 200, 0.18)');
+                        grad.addColorStop(1, 'rgba(255, 253, 200, 0)');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(lx0 - lw * 0.3, ly0 + lh, lw * 1.6, lh * 7);
+                        ctx.restore();
+                    }
+                }
             }
         }
 
