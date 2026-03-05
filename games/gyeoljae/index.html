@@ -212,7 +212,7 @@
         window.addEventListener('resize', resize);
 
         class BackWall {
-            constructor() { this.z = 2500; }
+            constructor() { this.z = 3500; }
             draw() {
                 let p = project(0, 0, this.z);
                 if (p.scale <= 0) return;
@@ -316,7 +316,7 @@
 
         class Plant {
             constructor() {
-                this.x = -450; this.y = FLOOR_Y; this.z = 1850;
+                this.x = -450; this.y = FLOOR_Y; this.z = 2850;
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -334,7 +334,7 @@
 
         class GolfBag {
             constructor() {
-                this.x = 650; this.y = FLOOR_Y; this.z = 2300;
+                this.x = 650; this.y = FLOOR_Y; this.z = 3300;
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -378,7 +378,7 @@
         }
 
         class Desk {
-            constructor() { this.z = 1800; }
+            constructor() { this.z = 2800; }
             draw() {
                 let p = project(0, 0, this.z);
                 if (p.scale < 0) return;
@@ -400,7 +400,7 @@
 
         class Boss {
             constructor() {
-                this.x = 0; this.y = 80; this.z = 2000; this.radius = 180; this.hit = false; this.reactionTimer = 0;
+                this.x = 0; this.y = 80; this.z = 3000; this.radius = 180; this.hit = false; this.reactionTimer = 0;
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -584,8 +584,8 @@
             state = 'idle'; failMessage = '';
             failOverlay.classList.remove('show');
             wall = new BackWall(); desk = new Desk(); boss = new Boss(); plant = new Plant(); golfBag = new GolfBag();
-            sideDesks = [new SideDesk(-1200, 1300, true), new SideDesk(1200, 1300, false)];
-            cabinets = [new DisplayCabinet(-1300, 2450), new DisplayCabinet(500, 2450)];
+            sideDesks = [new SideDesk(-1200, 2300, true), new SideDesk(1200, 2300, false)];
+            cabinets = [new DisplayCabinet(-1300, 3450), new DisplayCabinet(500, 3450)];
             folder = new Folder(); papers = []; particles = [];
             isDragging = false; dragDx = 0; dragDy = 0;
             resetBtn.classList.add('hidden'); instruction.classList.remove('hidden');
@@ -654,29 +654,29 @@
             ctx.fillStyle = '#829bb5'; ctx.fillRect(0, 0, width, height / 2);
             ctx.strokeStyle = '#627b95'; ctx.lineWidth = 2;
             for (let x = -4000; x <= 4000; x += 400) {
-                let p1 = project(x, CEILING_Y, -500); let p2 = project(x, CEILING_Y, 4000);
+                let p1 = project(x, CEILING_Y, -500); let p2 = project(x, CEILING_Y, 5000);
                 if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
-            for (let z = -200; z <= 4000; z += 400) {
+            for (let z = -200; z <= 5000; z += 400) {
                 let p1 = project(-4000, CEILING_Y, z); let p2 = project(4000, CEILING_Y, z);
                 if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
             ctx.fillStyle = '#5180a5'; ctx.fillRect(0, height / 2, width, height / 2);
             ctx.strokeStyle = '#396383'; ctx.lineWidth = 2;
             for (let x = -4000; x <= 4000; x += 300) {
-                let p1 = project(x, FLOOR_Y, -500); let p2 = project(x, FLOOR_Y, 4000);
+                let p1 = project(x, FLOOR_Y, -500); let p2 = project(x, FLOOR_Y, 5000);
                 if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
-            for (let z = -200; z <= 4000; z += 300) {
+            for (let z = -200; z <= 5000; z += 300) {
                 let p1 = project(-4000, FLOOR_Y, z); let p2 = project(4000, FLOOR_Y, z);
                 if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
             }
-            let gmTL = project(600, FLOOR_Y, 2400); let gmTR = project(800, FLOOR_Y, 2400);
-            let gmBR = project(800, FLOOR_Y, 1600); let gmBL = project(600, FLOOR_Y, 1600);
+            let gmTL = project(600, FLOOR_Y, 3400); let gmTR = project(800, FLOOR_Y, 3400);
+            let gmBR = project(800, FLOOR_Y, 2600); let gmBL = project(600, FLOOR_Y, 2600);
             if (gmBL.scale > 0 && gmTL.scale > 0) {
                 ctx.save(); ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(gmTL.sx, gmTL.sy); ctx.lineTo(gmTR.sx, gmTR.sy); ctx.lineTo(gmBR.sx, gmBR.sy); ctx.lineTo(gmBL.sx, gmBL.sy); ctx.closePath(); ctx.fill();
-                let hole = project(700, FLOOR_Y, 2250); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(hole.sx, hole.sy, 20 * hole.scale, 6 * hole.scale, 0, 0, Math.PI * 2); ctx.fill();
-                let ball = project(700, FLOOR_Y, 1750); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                let hole = project(700, FLOOR_Y, 3250); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(hole.sx, hole.sy, 20 * hole.scale, 6 * hole.scale, 0, 0, Math.PI * 2); ctx.fill();
+                let ball = project(700, FLOOR_Y, 2750); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 ctx.restore();
             }
         }
