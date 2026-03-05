@@ -5,14 +5,14 @@ async function updatePlayCounts() {
     const tissueCount = await getPlayCount("tissue-pull");
     const tissueEl = document.getElementById("count-tissue");
     if (tissueEl) {
-        tissueEl.innerHTML = `<span style="display:inline-block; transform:translateY(-1px); font-size:7px;">▶</span> ${tissueCount.toLocaleString()} PLAY`;
+        tissueEl.innerHTML = `${tissueCount.toLocaleString()} PLAY`;
     }
 
     // 결재 게임 플레이 수
     const gyeoljaeCount = await getPlayCount("gyeoljae");
     const gyeoljaeEl = document.getElementById("count-gyeoljae");
     if (gyeoljaeEl) {
-        gyeoljaeEl.innerHTML = `<span style="display:inline-block; transform:translateY(-1px); font-size:7px;">▶</span> ${gyeoljaeCount.toLocaleString()} PLAY`;
+        gyeoljaeEl.innerHTML = `${gyeoljaeCount.toLocaleString()} PLAY`;
     }
 }
 
