@@ -401,6 +401,19 @@
         class Boss {
             constructor() {
                 this.x = 0; this.y = 80; this.z = 6000; this.radius = 180; this.hit = false; this.reactionTimer = 0;
+                // 난이도 조절 변수: 부장님 좌우 이동 속도 및 범위
+                this.moveSpeed = 12;
+                this.moveRange = 1000; // 책장 근처까지 가도록 범위 조정
+                this.moveDir = 1;
+                this.hitTexts = ['이게 무슨 짓이야!', '누가 던졌어!', '내일 당장 시말서 써와!', '결재를 이렇게 받아!?'];
+                this.currentHitText = '이게 무슨 짓이야!';
+            }
+            update() {
+                if (!this.hit) {
+                    this.x += this.moveSpeed * this.moveDir;
+                    if (this.x > this.moveRange) { this.x = this.moveRange; this.moveDir = -1; }
+                    else if (this.x < -this.moveRange) { this.x = -this.moveRange; this.moveDir = 1; }
+                }
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -443,10 +456,12 @@
                 }
                 ctx.restore();
                 if (this.hit) {
-                    ctx.save(); ctx.translate(finalSx, finalSy);
+                    ctx.save();
+                    // 화면 중앙 상단에 고정 표시
+                    ctx.translate(width / 2, height / 2 - 150);
                     ctx.lineWidth = 4; ctx.strokeStyle = '#000';
-                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-140, -120); ctx.lineTo(140, -120); ctx.lineTo(140, -60); ctx.lineTo(15, -60); ctx.lineTo(0, -30); ctx.lineTo(-15, -60); ctx.lineTo(-140, -60); ctx.closePath(); ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = '#ef4444'; ctx.font = `26px 'NeoDunggeunmo'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('이게 무슨 짓이야!', 0, -88);
+                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-180, -120); ctx.lineTo(180, -120); ctx.lineTo(180, -60); ctx.lineTo(15, -60); ctx.lineTo(0, -30); ctx.lineTo(-15, -60); ctx.lineTo(-180, -60); ctx.closePath(); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#ef4444'; ctx.font = `26px 'NeoDunggeunmo'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.currentHitText, 0, -88);
                     ctx.restore();
                 }
                 if (this.hit && this.reactionTimer > 0) {
@@ -524,9 +539,10 @@
         class Paper {
             constructor(x, y, z, baseVx, baseVy, baseVz) {
                 this.w = 96; this.h = 128; this.x = x; this.y = y; this.z = z;
-                this.vx = baseVx * 0.1 + (Math.random() - 0.5) * 40;
-                this.vy = Math.abs(baseVy * 0.2) + Math.random() * 20 + 10;
-                this.vz = baseVz * 0.1 + (Math.random() - 0.5) * 40;
+                // 더 넓고 요란하게 흩뿌려지도록 속도와 범위를 대폭 증가
+                this.vx = baseVx * 0.3 + (Math.random() - 0.5) * 150;
+                this.vy = Math.abs(baseVy * 0.3) + Math.random() * 60 + 20;
+                this.vz = baseVz * 0.2 + (Math.random() - 0.5) * 150;
                 this.rotation = Math.random() * Math.PI * 2; this.rv = (Math.random() - 0.5) * 0.4;
                 this.flutterPhase = Math.random() * Math.PI * 2; this.flutterSpeed = 0.05 + Math.random() * 0.1;
                 this.flipPhase = Math.random() * Math.PI * 2; this.flipSpeed = 0.05 + Math.random() * 0.1;
@@ -593,8 +609,10 @@
 
         function explodeFolder(x, y, z, vx, vy, vz) {
             state = 'exploded'; boss.hit = true; boss.reactionTimer = 100; instruction.classList.add('hidden');
+            boss.currentHitText = boss.hitTexts[Math.floor(Math.random() * boss.hitTexts.length)];
             trackPlayCount("gyeoljae");
-            for (let i = 0; i < 15; i++) papers.push(new Paper(x, y, z, vx, vy, vz));
+            // 서류 뭉치 개수도 늘림
+            for (let i = 0; i < 30; i++) papers.push(new Paper(x, y, z, vx, vy, vz));
             for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, boss.z));
             setTimeout(() => { resetBtn.classList.remove('hidden'); }, 2000);
         }
@@ -643,8 +661,7 @@
                     let dotSize = 8 * currP.scale; ctx.fillRect(currP.sx - dotSize / 2, currP.sy - dotSize / 2, dotSize, dotSize);
                 }
                 if (simZ >= boss.z) {
-                    let hitP = project(simX, simY, simZ); ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4 * hitP.scale;
-                    let markW = 100 * hitP.scale; let markH = 40 * hitP.scale; ctx.strokeRect(hitP.sx - markW / 2, hitP.sy - markH / 2, markW, markH);
+                    // 목표점 사각 테두리 안내선 제거
                     return;
                 }
             }
@@ -693,6 +710,7 @@
         function animate() {
             ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, width, height);
             drawRoomEnvironment();
+            if (boss) boss.update();
             if (folder) folder.update();
             papers.forEach(paper => paper.update());
             particles.forEach(p => p.update());
