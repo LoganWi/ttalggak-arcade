@@ -4,12 +4,12 @@ async function updatePlayCounts() {
     // 티슈 뽑기 플레이 수
     const tissueCount = await getPlayCount("tissue-pull");
     const tissueEl = document.getElementById("count-tissue");
-    if (tissueEl) tissueEl.innerText = `▶ ${tissueCount.toLocaleString()} 플레이`;
+    if (tissueEl) tissueEl.innerText = `▶ ${tissueCount.toLocaleString()} PLAY`;
 
     // 결재 게임 플레이 수
     const gyeoljaeCount = await getPlayCount("gyeoljae");
     const gyeoljaeEl = document.getElementById("count-gyeoljae");
-    if (gyeoljaeEl) gyeoljaeEl.innerText = `▶ ${gyeoljaeCount.toLocaleString()} 플레이`;
+    if (gyeoljaeEl) gyeoljaeEl.innerText = `▶ ${gyeoljaeCount.toLocaleString()} PLAY`;
 }
 
 // 페이지 로드 시 실행
