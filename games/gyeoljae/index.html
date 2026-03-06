@@ -190,18 +190,19 @@
     </div>
 
     <div id="ui-layer">
-        <div class="flex justify-between items-start w-full">
-            <a href="/" id="home-btn" class="w-12 text-center" title="HOME">←</a>
-            <div class="text-center flex-1">
-                <h1 class="text-3xl md:text-5xl text-yellow-400 tracking-tighter pixel-text">
-                    결재해 주세요!
-                </h1>
-                <p id="instruction" class="text-black mt-4 text-sm md:text-base animate-pulse"
-                    style="text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">
-                    👇 결재판을 아래로 당겨서 날려버리세요!
-                </p>
-            </div>
-            <div style="width: 80px;"></div>
+        <!-- 상단 헤더 영역 -->
+        <div class="relative w-full text-center">
+            <!-- HOME 버튼 (왼쪽부터 바짝 붙임) -->
+            <a href="/" id="home-btn" class="absolute left-0 top-0 w-12 text-center" title="HOME">←</a>
+
+            <!-- 타이틀은 절대적 중앙 정렬 -->
+            <h1 class="text-3xl md:text-5xl text-yellow-400 tracking-tighter pixel-text inline-block">
+                결재해 주세요!
+            </h1>
+            <p id="instruction" class="text-black mt-4 text-sm md:text-base animate-pulse"
+                style="text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">
+                👇 결재판을 아래로 당겨서 날려버리세요!
+            </p>
         </div>
 
         <div class="flex justify-center mb-16 pointer-events-auto">
