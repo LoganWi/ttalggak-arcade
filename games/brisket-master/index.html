@@ -155,7 +155,7 @@
         <!-- HUD: 점수 및 가이드 -->
         <div id="hud" class="absolute top-4 left-4 pointer-events-none z-10">
             <div class="text-2xl text-white title-font drop-shadow-md text-stroke-thin">
-                연속 성공: <span id="scoreDisplay" class="text-yellow-400">0</span>
+                연속 성공: <span id="scoreDisplay" class="text-yellow-400">0/10</span>
             </div>
             <div
                 class="text-xs font-bold text-white mt-1 bg-black/50 px-2 py-1 rounded inline-block border border-gray-500/50">
@@ -427,7 +427,7 @@
         function resetGame(resetScore) {
             if (resetScore) {
                 score = 0;
-                scoreDisplay.innerText = score;
+                scoreDisplay.innerText = score + "/10";
             }
             startScreen.classList.add('hidden');
             feedbackScreen.classList.add('hidden');
@@ -564,7 +564,7 @@
 
             if (isSuccess) {
                 score++;
-                scoreDisplay.innerText = score;
+                scoreDisplay.innerText = score + "/10";
 
                 if (score >= 10) {
                     // 10장 클리어 달성!
