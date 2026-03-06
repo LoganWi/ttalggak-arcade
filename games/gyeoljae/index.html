@@ -150,28 +150,6 @@
             white-space: nowrap;
             display: inline-block;
         }
-
-        #hit-bubble .bubble-tail {
-            width: 0;
-            height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 18px solid #000;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        #hit-bubble .bubble-tail::after {
-            content: '';
-            position: absolute;
-            top: -20px;
-            left: -10px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 16px solid #fff;
-        }
     </style>
 </head>
 
@@ -186,7 +164,6 @@
 
     <div id="hit-bubble">
         <div class="bubble-text" id="hit-bubble-text"></div>
-        <div class="bubble-tail"></div>
     </div>
 
     <div id="ui-layer">
@@ -224,6 +201,7 @@
         const failDescText = document.getElementById('fail-desc-text');
         const hitBubble = document.getElementById('hit-bubble');
         const hitBubbleText = document.getElementById('hit-bubble-text');
+        const homeBtn = document.getElementById('home-btn');
 
         const INTERNAL_HEIGHT = 360;
         let width, height;
@@ -563,10 +541,10 @@
                 ctx.restore();
                 // 말풍선은 HTML overlay로 처리하므로 canvas 쪽 말풍선 제거
                 if (this.hit && this.reactionTimer > 0) {
-                    // 부장님 머리 위 3D 위치를 화면 좌표로 변환해서 버블 위치 계산
+                    // 부장님 머리 위 3D Y위치와 화면 정중앙 X위치 사용
                     let headWorld = project(this.x, this.y + 260, this.z);
                     const rect = canvas.getBoundingClientRect();
-                    const cssX = rect.left + (headWorld.sx / canvas.width) * rect.width;
+                    const cssX = rect.left + rect.width / 2;
                     const cssY = rect.top + (headWorld.sy / canvas.height) * rect.height;
                     hitBubble.style.left = cssX + 'px';
                     hitBubble.style.top = cssY + 'px';
@@ -868,8 +846,8 @@
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
         canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(e); }, { passive: false });
-        window.addEventListener('touchmove', (e) => { if (e.target !== resetBtn) e.preventDefault(); handleMove(e); }, { passive: false });
-        window.addEventListener('touchend', (e) => { if (e.target !== resetBtn) e.preventDefault(); handleEnd(e); }, { passive: false });
+        window.addEventListener('touchmove', (e) => { if (e.target !== resetBtn && e.target !== homeBtn) e.preventDefault(); handleMove(e); }, { passive: false });
+        window.addEventListener('touchend', (e) => { if (e.target !== resetBtn && e.target !== homeBtn) e.preventDefault(); handleEnd(e); }, { passive: false });
         resetBtn.addEventListener('click', initGame);
         resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); initGame(); }, { passive: false });
 
