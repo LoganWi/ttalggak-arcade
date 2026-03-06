@@ -14,6 +14,13 @@ async function updatePlayCounts() {
     if (gyeoljaeEl) {
         gyeoljaeEl.innerHTML = `${gyeoljaeCount.toLocaleString()} PLAY`;
     }
+
+    // 부장님의 차돌박이 플레이 수
+    const brisketMasterCount = await getPlayCount("brisket-master");
+    const brisketMasterEl = document.getElementById("count-brisket-master");
+    if (brisketMasterEl) {
+        brisketMasterEl.innerHTML = `${brisketMasterCount.toLocaleString()} PLAY`;
+    }
 }
 
 // 페이지 로드 시 실행
