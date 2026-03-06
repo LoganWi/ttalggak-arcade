@@ -250,7 +250,7 @@
 
         <!-- 피드백 (결과) 모달 -->
         <div id="feedbackScreen"
-            class="absolute inset-0 bg-black/60 hidden flex-col items-center justify-center z-20 p-6 backdrop-blur-sm">
+            class="absolute inset-0 bg-black/60 hidden flex flex-col items-center justify-center z-20 p-6 backdrop-blur-sm">
             <div
                 class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-all scale-95 border-4 border-gray-800">
                 <!-- 부장님 이미지 (SVG) -->
@@ -399,7 +399,9 @@
                 trackPlayCount("brisket-master");
                 resetGame(true);
             });
-            nextBtn.addEventListener('click', () => resetGame(false));
+            nextBtn.addEventListener('click', () => {
+                resetGame(resultStatus.innerText === '실패' || resultStatus.innerText === 'CLEAR!');
+            });
 
             // 입력 이벤트 (클릭 및 스페이스바)
             window.addEventListener('mousedown', (e) => {
