@@ -191,7 +191,7 @@
 
     <div id="ui-layer">
         <div class="flex justify-between items-start w-full">
-            <a href="/" id="home-btn">← HOME</a>
+            <a href="/" id="home-btn" class="w-12 text-center" title="HOME">←</a>
             <div class="text-center flex-1">
                 <h1 class="text-3xl md:text-5xl text-yellow-400 tracking-tighter pixel-text">
                     결재해 주세요!
@@ -789,12 +789,13 @@
             let simX = folder.x; let simY = folder.y; let simZ = folder.z;
             let simVx = -dragDx * 0.3; let simVy = dragDy * 0.6; let simVz = dragDy * 2.2;
             ctx.fillStyle = '#ef4444';
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 90; i++) {
                 simVy -= GRAVITY; simX += simVx; simY += simVy; simZ += simVz;
-                if (i % 3 === 0) {
-                    let currP = project(simX, simY, simZ); if (currP.scale < 0) break;
-                    let dotSize = 8 * currP.scale; ctx.fillRect(currP.sx - dotSize / 2, currP.sy - dotSize / 2, dotSize, dotSize);
-                }
+
+                // 더 촘촘하게 그리기 위해 i % 3 조건 제거하고 크기를 약간 줄임
+                let currP = project(simX, simY, simZ); if (currP.scale < 0) break;
+                let dotSize = 6 * currP.scale; ctx.fillRect(currP.sx - dotSize / 2, currP.sy - dotSize / 2, dotSize, dotSize);
+
                 if (simZ >= boss.z) {
                     // 목표점 사각 테두리 안내선 제거
                     return;
