@@ -522,7 +522,19 @@
 
                 if (thicknessMm >= 0.1 && thicknessMm <= 0.6) {
                     status = '성공';
-                    msg = "오~ 종잇장처럼 얇은 완벽한 차돌박이야!";
+                    const successMsgs = [
+                        "오~ 종잇장처럼 얇은 완벽한 차돌박이야!",
+                        "와~ 고기 뒤로 자네 미래가 다 보이네! 투명해!",
+                        "오~ 거의 종이비행기 접어도 되겠는데?",
+                        "자네, 이게 고기야 냅킨이야? 아주 야무져!",
+                        "오~ 입에 넣기도 전에 증발하겠어? 합격!",
+                        "역시 에이스! 고기 써는 거 보니 보고서도 얇겠어?",
+                        "이야, 차돌박이로 뜨개질도 하겠어? 기가 막히네!",
+                        "이건 고기가 아니라 예술이야, '차돌 페이퍼'네!",
+                        "오~ 이 정교함! 젓가락이 비칠 정도네? 예술이야!",
+                        "거의 시스루인데? 고기가 숨을 쉬고 있어!"
+                    ];
+                    msg = successMsgs[Math.floor(Math.random() * successMsgs.length)];
                     face = bossFaces.happy;
                     isSuccess = true;
                 } else if (thicknessMm >= 0.7 && thicknessMm <= 2.0) {
