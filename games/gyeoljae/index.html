@@ -226,8 +226,10 @@
         const INTERNAL_HEIGHT = 360;
         let width, height;
 
-        let state = 'idle'; // idle, flying, exploded, missed
+        let state = 'idle'; // idle, flying, exploded, missed, round_clear, game_clear
         let failMessage = '';
+        let currentRound = 1;
+        const MAX_ROUNDS = 5;
 
         const FOCAL_LENGTH = 350;
         const GRAVITY = 1.2;
@@ -455,16 +457,32 @@
         class Boss {
             constructor() {
                 this.x = 0; this.y = 80; this.z = 6000; this.radius = 180; this.hit = false; this.reactionTimer = 0;
-                // 난이도 조절 변수: 부장님 좌우 이동 속도 및 범위
-                this.moveSpeed = 12;
+                // 난이도 조절 변수: 기본 속도
+                this.baseSpeed = 12;
                 this.moveRange = 1000; // 책장 근처까지 가도록 범위 조정
                 this.moveDir = 1;
-                this.hitTexts = ['이게 무슨 짓이야!', '누가 던졌어!', '내일 당장 시말서 써와!', '결재를 이렇게 받아!?'];
-                this.currentHitText = '이게 무슨 짓이야!';
+
+                // 라운드별 투덜거림 / 칭찬 문구
+                this.sarcasticTexts = [
+                    "이게 최선이야?", "한눈에 안 들어오네. 다시.", "초등학생이 쓴 거 아니지?",
+                    "고민한 흔적이 안 보이는데?", "감이 그렇게 안 오나?", "방향이 아예 틀렸어. 처음부터 다시.",
+                    "내가 말한 거 이해 못 했어?", "이거... 수준이 좀 떨어지는데.",
+                    "엣지가 없어. 알지? 그 느낌?", "주말에 뭐 했어? 생각 좀 더 해오지."
+                ];
+                this.praiseTexts = [
+                    "오, 이번 건 좀 사람답게 써왔네?", "웬일이야? 해가 서쪽에서 뜨겠어.",
+                    "자네, 하면 되는데 그동안 안 한 거지?", "내 생각보다 아주 조금 더 잘했네.",
+                    "이제야 내 스타일을 좀 파악했나 봐?", "오~ 발전했어. 지난번엔 진짜 최악이었잖아.",
+                    "이 정도면 어디 가서 내 부하직원이라고 해도 되겠어.", "역시 굴려야 제맛이라니까. 고생했어.",
+                    "이 느낌이지! 근데 다음엔 더 잘할 수 있지?", "자네 없으면 일 어떻게 하나 몰라. (일 더 줄 예정)"
+                ];
+                this.currentHitText = '';
             }
             update() {
-                if (!this.hit) {
-                    this.x += this.moveSpeed * this.moveDir;
+                if (!this.hit && currentRound > 1) {
+                    // 1라운드는 가만히 있고, 라운드가 거듭될수록 빨라짐
+                    let speedMultiplier = 1 + (currentRound - 2) * 0.5;
+                    this.x += this.baseSpeed * speedMultiplier * this.moveDir;
                     if (this.x > this.moveRange) { this.x = this.moveRange; this.moveDir = -1; }
                     else if (this.x < -this.moveRange) { this.x = -this.moveRange; this.moveDir = 1; }
                 }
@@ -481,6 +499,23 @@
                 }
                 ctx.save(); ctx.translate(finalSx, finalSy); ctx.scale(p.scale, p.scale);
                 ctx.lineWidth = 8; ctx.strokeStyle = '#000';
+                // 의자 다리 및 바퀴 (하반신)
+                ctx.fillStyle = '#333'; ctx.fillRect(-20, 130, 40, 100); ctx.strokeRect(-20, 130, 40, 100); // 중심 축
+                ctx.fillStyle = '#222';
+                ctx.beginPath(); ctx.moveTo(-20, 200); ctx.lineTo(-120, 250); ctx.lineTo(-100, 270); ctx.lineTo(-10, 230); ctx.fill(); ctx.stroke(); // 왼다리
+                ctx.beginPath(); ctx.moveTo(20, 200); ctx.lineTo(120, 250); ctx.lineTo(100, 270); ctx.lineTo(10, 230); ctx.fill(); ctx.stroke(); // 오른다리
+                ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-110, 270, 20, 0, Math.PI * 2); ctx.fill(); // 바퀴 L
+                ctx.beginPath(); ctx.arc(110, 270, 20, 0, Math.PI * 2); ctx.fill(); // 바퀴 R
+
+                // 다리 (바지)
+                ctx.fillStyle = '#1a202c'; // 진한 남색 바지
+                ctx.fillRect(-120, 140, 100, 70); ctx.strokeRect(-120, 140, 100, 70);
+                ctx.fillRect(20, 140, 100, 70); ctx.strokeRect(20, 140, 100, 70);
+                // 신발
+                ctx.fillStyle = '#000';
+                ctx.beginPath(); ctx.ellipse(-90, 220, 40, 20, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(90, 220, 40, 20, 0, 0, Math.PI * 2); ctx.fill();
+
                 // 의자 등받이
                 ctx.fillStyle = '#8B0000'; ctx.fillRect(-280, -280, 560, 420, 20);
                 ctx.beginPath(); ctx.roundRect(-280, -280, 560, 420, 20); ctx.fill(); ctx.stroke();
@@ -666,26 +701,54 @@
             }
         }
 
-        function initGame() {
+        function initGame(fullReset = true) {
             state = 'idle'; failMessage = '';
             failOverlay.classList.remove('show');
+            if (fullReset) {
+                currentRound = 1;
+                failTitleText.innerText = 'FAIL';
+                failTitleText.style.color = '#ef4444';
+                resetBtn.innerText = 'RESTART';
+            }
             wall = new BackWall(); desk = new Desk(); boss = new Boss(); plant = new Plant(); golfBag = new GolfBag();
             sideDesks = [new SideDesk(-1200, 3900, true), new SideDesk(1200, 3900, false)];
             cabinets = [new DisplayCabinet(-1300, 7350), new DisplayCabinet(500, 7350)];
             folder = new Folder(); papers = []; particles = [];
             isDragging = false; dragDx = 0; dragDy = 0;
-            resetBtn.classList.add('hidden'); instruction.classList.remove('hidden');
+            resetBtn.classList.add('hidden');
+            instruction.innerText = `[ROUND ${currentRound}/${MAX_ROUNDS}] 결재판을 당겨서 날리세요!`;
+            instruction.classList.remove('hidden');
         }
 
         function explodeFolder(x, y, z, vx, vy, vz) {
-            state = 'exploded'; boss.hit = true; boss.reactionTimer = 100; instruction.classList.add('hidden');
-            boss.currentHitText = boss.hitTexts[Math.floor(Math.random() * boss.hitTexts.length)];
-            hitBubbleText.innerText = boss.currentHitText;
+            boss.hit = true; boss.reactionTimer = 150; instruction.classList.add('hidden');
+
+            if (currentRound < MAX_ROUNDS) {
+                state = 'round_clear';
+                boss.currentHitText = boss.sarcasticTexts[Math.floor(Math.random() * boss.sarcasticTexts.length)];
+                hitBubbleText.innerText = boss.currentHitText;
+                setTimeout(() => {
+                    currentRound++;
+                    initGame(false);
+                }, 3000);
+            } else {
+                state = 'game_clear';
+                boss.currentHitText = boss.praiseTexts[Math.floor(Math.random() * boss.praiseTexts.length)];
+                hitBubbleText.innerText = boss.currentHitText;
+                setTimeout(() => {
+                    failTitleText.innerText = 'CLEAR!';
+                    failTitleText.style.color = '#22c55e';
+                    failDescText.innerText = '모든 결재를 받아냈습니다!\n이제 퇴근하세요!';
+                    failOverlay.classList.add('show');
+                    resetBtn.innerText = '다시 출근하기';
+                    resetBtn.classList.remove('hidden');
+                }, 3500);
+            }
+
             trackPlayCount("gyeoljae");
             // 서류 뭉치 개수도 늘림
             for (let i = 0; i < 30; i++) papers.push(new Paper(x, y, z, vx, vy, vz));
             for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, boss.z));
-            setTimeout(() => { resetBtn.classList.remove('hidden'); }, 2000);
         }
 
         function getCanvasPos(e) {
@@ -822,7 +885,7 @@
             if (golfBag) renderList.push({ z: golfBag.z, obj: golfBag });
             sideDesks.forEach(sd => renderList.push({ z: sd.z, obj: sd }));
             cabinets.forEach(cab => renderList.push({ z: cab.z, obj: cab }));
-            if (folder && state !== 'exploded') renderList.push({ z: folder.z, obj: folder });
+            if (folder && state !== 'exploded' && state !== 'round_clear' && state !== 'game_clear') renderList.push({ z: folder.z, obj: folder });
             papers.forEach(p => renderList.push({ z: p.z, obj: p }));
             particles.forEach(p => renderList.push({ z: p.z, obj: p }));
             renderList.sort((a, b) => b.z - a.z);
