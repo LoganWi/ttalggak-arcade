@@ -5,7 +5,7 @@ const gamesData = [
     {
         id: "soju",
         title: "막내의 눈물나는 소주따르기",
-        desc: "대망의 입사 후 첫 회식날. 상사의 지시에 맞춰 소주를 완벽하게 따르세요!",
+        desc: "면접 때 '소주 하난 기가 막히게 따릅니다'라고 질렀는데... 대망의 첫 회식, 입사 취소 안 되려면 손목 스냅 잘 활용해라.",
         href: "/games/soju/",
         thumbClass: "thumb-soju",
         thumbUrl: "/assets/images/thumb-soju.png",
@@ -15,7 +15,7 @@ const gamesData = [
     {
         id: "brisket-master",
         title: "부장님의 차돌박이",
-        desc: "화면을 터치해 종잇장처럼 얇은 차돌박이를 썰어보세요!",
+        desc: "회식비 아끼려다 내 손목 나갈 뻔? 차돌박이인지 습자지인지 모르게 얇게 써는 게 핵심.",
         href: "/games/brisket-master/",
         thumbClass: "thumb-brisket-master",
         thumbUrl: "/assets/images/thumb-brisket-master.png",
@@ -25,7 +25,7 @@ const gamesData = [
     {
         id: "gyeoljae",
         title: "결재해 주세요!",
-        desc: "결재판을 아래로 당겨 부장님께 날려버리세요! 3D 슬링샷 액션.",
+        desc: "수정... 또 수정... '진짜최종_최종_18차'본입니다. 부장님 안면에 시원하게 날려주세요!",
         href: "/games/gyeoljae/",
         thumbClass: "thumb-gyeoljae",
         thumbUrl: "/assets/images/thumb-gyeoljae.png",
@@ -35,7 +35,7 @@ const gamesData = [
     {
         id: "tissue-pull",
         title: "티슈 마구마구 뽑기",
-        desc: "위로 스와이프해서 티슈를 뽑아보세요! 연속 뽑기와 선풍기 모드까지.",
+        desc: "남은 연차도 없는데 티슈라도 신나게 뽑아야지. 누가 보든 말든 빈 곽이 될 때까지!",
         href: "/games/tissue-pull/",
         thumbClass: "thumb-tissue",
         thumbUrl: "/assets/images/thumb-tissue.png",

@@ -38,32 +38,37 @@
             min-height: 100vh;
             background: var(--bg-dark);
             background-image:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(184, 79, 255, 0.25) 0%, transparent 70%),
+                /* 오피스 모니터 감성의 스틸 블루 글로우 */
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(144, 202, 249, 0.15) 0%, transparent 70%),
                 linear-gradient(180deg, #0a0a1a 0%, #0d0d2b 100%);
             font-family: 'Outfit', 'Noto Sans KR', sans-serif;
             color: #fff;
             overflow-x: hidden;
         }
 
-        /* 배경 별 효과 */
+        /* 배경 보케 효과 및 CRT 스캔라인 오버레이 */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background-image:
-                radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
-                radial-gradient(1px 1px at 30% 70%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-                radial-gradient(1px 1px at 60% 15%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
-                radial-gradient(1px 1px at 80% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-                radial-gradient(1px 1px at 50% 85%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-                radial-gradient(1px 1px at 90% 30%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
-                radial-gradient(1px 1px at 20% 90%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-                radial-gradient(1px 1px at 70% 75%, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+                /* 보케 (Bokeh) */
+                radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+                radial-gradient(1px 1px at 60% 15%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+                radial-gradient(1px 1px at 80% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 100%),
+                radial-gradient(1px 1px at 20% 90%, rgba(255, 255, 255, 0.2) 0%, transparent 100%),
+                /* CRT 스캔라인 텍스처 (오피스 복고 감성) */
+                repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.1),
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 2px);
             pointer-events: none;
-            z-index: 0;
+            z-index: 5;
+            /* 얇은 노이즈가 컨텐츠 위를 살짝 덮도록 조정 */
         }
 
-        /* 3D 사이버 그리드 */
+        /* 3D 사내 인트라넷 감성 그리드 (톤다운) */
         body::after {
             content: '';
             position: fixed;
@@ -72,15 +77,15 @@
             width: 200%;
             height: 200%;
             background-image:
-                linear-gradient(rgba(0, 245, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 245, 255, 0.1) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 50px 50px;
-            transform: perspective(500px) rotateX(60deg) translateY(0);
-            animation: gridMove 10s linear infinite;
+            transform: perspective(600px) rotateX(65deg) translateY(0);
+            animation: gridMove 15s linear infinite;
             pointer-events: none;
             z-index: 0;
-            mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 60%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 60%);
+            mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%);
         }
 
         @keyframes gridMove {
@@ -113,13 +118,30 @@
         }
 
         .logo-subtitle {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 11px;
-            color: #fff;
-            letter-spacing: 4px;
-            text-transform: uppercase;
+            font-family: 'NeoDunggeunmo', monospace;
+            font-size: 14px;
+            color: #ff5252;
+            letter-spacing: 1px;
             margin-bottom: 24px;
-            display: block;
+            display: inline-block;
+            /* 경고 라벨 스타일 */
+            padding: 6px 14px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 82, 82, 0.4);
+            background: rgba(255, 82, 82, 0.1);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .logo-title {
@@ -128,17 +150,29 @@
             font-weight: 400;
             line-height: 1.4;
             letter-spacing: 2px;
-            color: #ffeb3b;
-            -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.7);
+            color: #f7f9fa;
+            /* 은은한 백색 톤 */
+            -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.4);
             text-shadow:
-                0px 2px 0px #e53935,
-                0px 4px 0px #e53935,
-                0px 6px 0px #b71c1c,
-                0px 8px 0px #b71c1c,
+                0px 2px 0px #455a64,
+                0px 4px 0px #455a64,
+                0px 6px 0px #263238,
+                0px 8px 0px #263238,
                 0px 10px 0px rgba(0, 0, 0, 0.8),
                 0px 15px 25px rgba(0, 0, 0, 0.4);
             position: relative;
             z-index: 2;
+            animation: pulseTitle 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseTitle {
+            0% {
+                filter: brightness(1);
+            }
+
+            100% {
+                filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+            }
         }
 
         /* 구분선 */
@@ -154,13 +188,14 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+            background: linear-gradient(90deg, transparent, rgba(144, 202, 249, 0.4), transparent);
         }
 
         .divider span {
             font-family: 'Press Start 2P', monospace;
             font-size: 10px;
-            color: var(--neon-purple);
+            color: #90caf9;
+            letter-spacing: 2px;
             white-space: nowrap;
         }
 
@@ -174,10 +209,12 @@
         /* 게임 카드 */
         .game-card {
             position: relative;
-            background: rgba(18, 18, 42, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(25, 28, 41, 0.6);
+            /* 오피스 컨셉에 맞춘 차분한 네이비 톤 */
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* 세련된 반투명 라인 */
             border-radius: 20px;
             overflow: hidden;
             text-decoration: none;
@@ -185,11 +222,13 @@
             transition: transform 0.5s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
             display: block;
             transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .game-card.active:hover {
-            box-shadow: 0 20px 40px rgba(255, 45, 120, 0.25), 0 0 0 1px rgba(255, 45, 120, 0.7);
-            border-color: rgba(255, 45, 120, 0.7);
+            /* 형광펜(하이라이터)를 연상시키는 라임/사이버 옐로우 샤도우 (오피스 컨셉) */
+            box-shadow: 0 15px 35px rgba(200, 255, 0, 0.15), 0 0 0 1px rgba(200, 255, 0, 0.5);
+            border-color: rgba(200, 255, 0, 0.6);
         }
 
         .game-card.active:hover .card-thumbnail {
@@ -266,13 +305,15 @@
             position: absolute;
             top: 14px;
             right: 14px;
-            background: rgba(255, 230, 0, 0.15);
-            border: 1px solid var(--neon-yellow);
-            color: var(--neon-yellow);
+            background: rgba(200, 255, 0, 0.15);
+            /* 형광펜 색 통일 */
+            border: 1px solid rgba(200, 255, 0, 0.8);
+            color: #c8ff00;
             font-family: 'Press Start 2P', monospace;
             font-size: 8px;
             padding: 5px 10px;
-            border-radius: 20px;
+            border-radius: 4px;
+            /* 형광펜 사각 느낌 */
             transition: opacity 0.3s ease;
         }
 
@@ -280,13 +321,15 @@
             position: absolute;
             top: 14px;
             right: 14px;
-            background: rgba(255, 45, 120, 0.2);
-            border: 1px solid var(--neon-pink);
-            color: var(--neon-pink);
+            background: rgba(200, 255, 0, 0.15);
+            /* 형광펜 색 통일 */
+            border: 1px solid rgba(200, 255, 0, 0.8);
+            color: #c8ff00;
             font-family: 'Press Start 2P', monospace;
             font-size: 8px;
             padding: 5px 10px;
-            border-radius: 20px;
+            border-radius: 4px;
+            /* 사무적인 느낌으로 살짝 각지게 */
             display: flex;
             align-items: center;
             gap: 6px;
@@ -319,8 +362,9 @@
 
         .card-tag {
             font-family: 'NeoDunggeunmo', 'Press Start 2P', monospace;
-            font-size: 14px;
-            color: var(--neon-cyan);
+            font-size: 12px;
+            color: #90caf9;
+            /* 사무적인 블루 계열 */
             display: inline-block;
             letter-spacing: 0.5px;
         }
@@ -391,7 +435,7 @@
     <div class="container">
         <header>
             <div class="logo-wrap">
-                <span class="logo-subtitle">HYPER-CASUAL HUB</span>
+                <span class="logo-subtitle">※주의※ 회사에서 하지 마시오.</span>
                 <h1 class="logo-title">TTALGGAK ARCADE</h1>
             </div>
         </header>
