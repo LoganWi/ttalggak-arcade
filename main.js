@@ -2,13 +2,15 @@ import { getPlayCount } from "./api-playcount.js";
 
 // 게임 최신 순서 (ID 기준)
 const GAME_ORDER = [
-    "card-brisket-master", // 가장 최신
+    "card-soju",           // 가장 최신
+    "card-brisket-master",
     "card-gyeoljae",
     "card-tissue"          // 가장 오래됨
 ];
 
 async function updatePlayCounts() {
     const counts = {
+        "soju": "count-soju",
         "tissue-pull": "count-tissue",
         "gyeoljae": "count-gyeoljae",
         "brisket-master": "count-brisket-master"

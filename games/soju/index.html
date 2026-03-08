@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>막내의 눈물나는 소주따르기</title>
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="막내의 눈물나는 소주따르기">
+    <meta property="og:image" content="https://ttalggak-arcade.vercel.app/assets/images/thumb-soju.png">
+    <meta property="og:url" content="https://ttalggak-arcade.vercel.app/games/soju/">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@latest/neodgm/style.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a2e;
+            font-family: 'NeoDunggeunmo', sans-serif;
+            touch-action: none;
+            /* 모바일에서 드래그, 줌 방지 */
+            user-select: none;
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            background-color: #000;
+        }
+
+        .ui-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.85);
+            border: 4px solid #fff;
+            padding: 24px;
+            text-align: center;
+            pointer-events: auto;
+            color: white;
+            max-width: 95%;
+            width: 360px;
+            /* 너비를 약간 넓혀서 텍스트 줄바꿈 방지 */
+            word-break: keep-all;
+            /* 단어 단위로 줄바꿈 되도록 처리 */
+            position: relative;
+        }
+
+        button {
+            background-color: #2E7D32;
+            color: white;
+            border: 2px solid #A5D6A7;
+            padding: 12px 80px;
+            /* 버튼 좌우 여백을 더욱 넉넉하게 확장 */
+            font-family: 'NeoDunggeunmo', sans-serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* 메인으로 돌아가기 버튼 */
+        .btn-home {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 20;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-home:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="/" class="btn-home" aria-label="메인 화면으로">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+    </a>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui" class="ui-layer">
+        <!-- 시작 화면 -->
+        <div id="panelMenu" class="panel">
+            <h1 class="text-3xl font-bold mb-4 text-green-400">막내의 눈물나는<br>소주따르기</h1>
+            <p class="text-sm mb-4 leading-relaxed">
+                대망의 입사 후 첫 회식날.<br>
+                면접 때 소주 기가 막히게 따른다고<br>
+                어필해서 합격했는데... 증명해내자!
+            </p>
+            <div class="text-left text-xs text-gray-300 mb-4 bg-gray-800 p-2 rounded border border-gray-600">
+                [게임 규칙]<br>
+                상사가 지시하는 'n부' 높이에 맞춰 소주를 따르세요.<br>
+                (예: 7부 = 잔의 70% 높이)
+            </div>
+            <button id="btnStart">회식 시작</button>
+        </div>
+
+        <!-- 게임 오버 화면 -->
+        <div id="panelGameover" class="panel hidden">
+            <h1 class="text-3xl font-bold mb-4 text-red-400">해고 통보</h1>
+            <p id="failMessage" class="text-lg mb-4"></p>
+            <p id="finalScore" class="text-xl text-yellow-300 mb-6"></p>
+            <button id="btnRestart">다시 도전</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { trackPlayCount } from '../../api-playcount.js';
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // UI Elements
+        const panelMenu = document.getElementById('panelMenu');
+        const panelGameover = document.getElementById('panelGameover');
+        const btnStart = document.getElementById('btnStart');
+        const btnRestart = document.getElementById('btnRestart');
+        const failMessage = document.getElementById('failMessage');
+        const finalScore = document.getElementById('finalScore');
+
+        // 게임 내부 해상도 (폭을 늘려 점수 UI와 전체적인 화면이 잘 담기도록 수정)
+        const GAME_WIDTH = 220;
+        const GAME_HEIGHT = 320;
+
+        // 게임 상태 관리
+        let state = 'MENU'; // MENU, READY, POURING, EVALUATING, GAMEOVER
+        let score = 0;
+        let bestScore = 0;
+        let targetBu = 5;
+        let currentFill = 0;
+        let bossMessage = '';
+        let particles = [];
+        let shakeTime = 0;
+
+        let lastTime = 0;
+
+        // 새로운 변수들 (잔 움직임, 따르는 위치, 찰랑거림)
+        let glassX = 70;
+        let glassTargetX = 70;
+        let spoutX = 90;
+        let isHittingGlass = false;
+        let liquidWaveOffset = 0;
+        let spilledAmount = 0; // 추가: 흘린 소주 양
+        let readyTime = 0; // 추가: 대기(뜸 들이는) 시간
+
+        // 현재 상사(보스)의 외형 데이터
+        let currentBoss = { suit: '#37474F', sleeve: '#263238', skin: '#FFE0B2', hair: '#212121', tie: '#B71C1C', hasGlasses: true };
+
+        // 오차 범위 계산 (점수가 오를수록 엄격해짐)
+        function getTolerance() {
+            if (score < 5) return 8;       // ±8%
+            if (score < 10) return 5;      // ±5%
+            if (score < 20) return 3;      // ±3%
+            return 2;                      // ±2%
+        }
+
+        // 캔버스 리사이징 (비율 유지, 픽셀 매칭)
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            const scale = Math.min(window.innerWidth / GAME_WIDTH, window.innerHeight / GAME_HEIGHT) * 0.95; // 화면에 꽉 차지 않게 여백 추가
+
+            canvas.style.width = `${GAME_WIDTH * scale}px`;
+            canvas.style.height = `${GAME_HEIGHT * scale}px`;
+
+            canvas.width = GAME_WIDTH * scale * dpr;
+            canvas.height = GAME_HEIGHT * scale * dpr;
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(scale * dpr, scale * dpr);
+            ctx.imageSmoothingEnabled = false; // 안티앨리어싱 해제
+        }
+
+        window.addEventListener('resize', resize);
+
+        // 게임 로직 함수들
+        function startGame() {
+            trackPlayCount('soju', true); // 플레이 수 증가 (시작 & 재도전 모두 카운트)
+
+            score = 0;
+            panelMenu.classList.add('hidden');
+            panelGameover.classList.add('hidden');
+            resetRound();
+        }
+
+        function resetRound() {
+            currentFill = 0;
+            spilledAmount = 0; // 흘린 양 초기화
+            readyTime = 0; // 대기 시간 초기화
+            targetBu = Math.floor(Math.random() * 7) + 3; // 3부 ~ 9부
+
+            // 상사 지시 멘트 변칙 적용 (랜덤)
+            const requestMessages = [
+                `딱 ${targetBu}부만 따라!`,
+                `오늘은 ${targetBu}부다!`,
+                `센스있게 ${targetBu}부~`,
+                `자~ ${targetBu}부 가자!`,
+                `${targetBu}부 알지? ㅋ`
+            ];
+            bossMessage = requestMessages[Math.floor(Math.random() * requestMessages.length)];
+
+            // 상사 외형 랜덤 생성 (연속으로 같은 색상이 나오지 않게 보장)
+            const bossStyles = [
+                { suit: '#37474F', sleeve: '#263238' }, // 네이비
+                { suit: '#5D4037', sleeve: '#3E2723' }, // 브라운
+                { suit: '#424242', sleeve: '#212121' }, // 다크그레이
+                { suit: '#283593', sleeve: '#1A237E' }, // 짙은 블루
+                { suit: '#00695C', sleeve: '#004D40' }, // 다크 청록
+                { suit: '#4A148C', sleeve: '#311B92' }, // 보라색
+                { suit: '#827717', sleeve: '#33691E' }  // 올리브
+            ];
+            const skinTones = ['#FFE0B2', '#FFCC80', '#FFB74D', '#FFCDD2']; // 다양한 피부톤
+            const hairColors = ['#212121', '#3E2723', '#757575', '#546E7A']; // 검은색, 갈색, 회색 등
+            const tieColors = ['#B71C1C', '#0D47A1', '#1B5E20', '#F57F17', '#4A148C']; // 다양한 넥타이 색
+
+            let style;
+            do {
+                style = bossStyles[Math.floor(Math.random() * bossStyles.length)];
+            } while (currentBoss && currentBoss.suit === style.suit); // 이전 라운드와 옷 색상이 겹치면 다시 뽑기
+
+            currentBoss = {
+                suit: style.suit,
+                sleeve: style.sleeve, // 몸통보다 진한 소매 색상 적용
+                skin: skinTones[Math.floor(Math.random() * skinTones.length)],
+                hair: hairColors[Math.floor(Math.random() * hairColors.length)],
+                tie: tieColors[Math.floor(Math.random() * tieColors.length)],
+                hasGlasses: Math.random() > 0.4 // 60% 확률로 안경 착용
+            };
+
+            // 잔 및 따르는 위치 초기화 (가운데)
+            glassX = GAME_WIDTH / 2 - 20;
+            glassTargetX = glassX;
+            spoutX = GAME_WIDTH / 2;
+
+            state = 'READY';
+        }
+
+        function evaluate() {
+            state = 'EVALUATING';
+            let targetPercent = targetBu * 10;
+            let diff = currentFill - targetPercent;
+            let tolerance = getTolerance();
+
+            if (Math.abs(diff) <= tolerance) {
+                // 성공 (약간 킹받는 짧은 멘트들)
+                const successMessages = [
+                    "오~ 제법인데 ㅋ",
+                    "MZ는 다르구만~",
+                    "크으~ 기깔나네!",
+                    "통과! 다음 잔~",
+                    "눈썰미 좀 치네 ㅋ",
+                    "사회생활 잘하네 ㅋ",
+                    "내일 진급시켜줄까? ㅋ",
+                    "자네, 영업 뛰어볼 텐가? ㅋ",
+                    "이 집 소주 잘 따르네~",
+                    "센스가 철철 넘치네 ㅋ"
+                ];
+                bossMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+                score++;
+                setTimeout(resetRound, 1500);
+            } else {
+                // 실패
+                shakeTime = 400; // 화면 흔들림 효과
+                if (diff > 0) {
+                    const overMessages = [
+                        "표면장력 테스트해? ㅋ",
+                        "아주 제사 지내라~",
+                        "선 넘네? ㅋ",
+                        "나 오늘 죽이려고? ㅋ",
+                        "잔 뚫어지겠다 어휴~"
+                    ];
+                    bossMessage = overMessages[Math.floor(Math.random() * overMessages.length)];
+                    gameOver("눈치 없이 소주를 너무 많이 따랐습니다...");
+                } else {
+                    const underMessages = [
+                        "장난해? 장난해? ㅋ",
+                        "누구 코에 붙이라고~",
+                        "나랑 술 마시기 싫지?",
+                        "정내미 떨어지네 ㅋ",
+                        "에게? 겨우 요만큼? ㅋ"
+                    ];
+                    bossMessage = underMessages[Math.floor(Math.random() * underMessages.length)];
+                    gameOver("소심하게 소주를 너무 적게 따랐습니다...");
+                }
+            }
+        }
+
+        function gameOver(reason) {
+            state = 'GAMEOVER';
+            if (score > bestScore) bestScore = score;
+
+            setTimeout(() => {
+                failMessage.innerText = reason;
+                finalScore.innerText = `최종: ${score}잔\n최고 기록: ${bestScore}잔`;
+                panelGameover.classList.remove('hidden');
+            }, 1500);
+        }
+
+        // 입력 위치 계산 (게임 해상도 기준)
+        function getGameX(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            let scaleX = GAME_WIDTH / rect.width;
+            return (clientX - rect.left) * scaleX;
+        }
+
+        // 입력 처리
+        function handleInputStart(e) {
+            if (e.target.tagName === 'BUTTON') return;
+            e.preventDefault(); // 화면 스크롤 방지
+
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            if (clientX !== undefined) {
+                spoutX = getGameX(clientX);
+            }
+
+            if (state === 'READY') {
+                state = 'POURING';
+            }
+        }
+
+        function handleInputMove(e) {
+            if (state === 'POURING') {
+                e.preventDefault(); // 모바일 환경 스와이프 방지
+                let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                if (clientX !== undefined) {
+                    spoutX = getGameX(clientX);
+                    // 소주병이 화면 밖으로 나가지 않게 제한
+                    spoutX = Math.max(10, Math.min(GAME_WIDTH - 10, spoutX));
+                }
+            }
+        }
+
+        function handleInputEnd(e) {
+            if (state === 'POURING') {
+                evaluate();
+            }
+        }
+
+        window.addEventListener('mousedown', handleInputStart);
+        window.addEventListener('touchstart', handleInputStart, { passive: false });
+        window.addEventListener('mousemove', handleInputMove);
+        window.addEventListener('touchmove', handleInputMove, { passive: false });
+        window.addEventListener('mouseup', handleInputEnd);
+        window.addEventListener('touchend', handleInputEnd);
+
+        btnStart.addEventListener('click', startGame);
+        btnRestart.addEventListener('click', startGame);
+
+        // 업데이트 루프
+        function update(dt) {
+            // 뜸 들이기 체크 (READY 상태일 때)
+            if (state === 'READY') {
+                readyTime += dt;
+                // 4초(4000ms) 이상 안 따르면 타임아웃 실패 처리
+                if (readyTime > 4000) {
+                    const timeoutMessages = [
+                        "자냐? ㅋ",
+                        "술병 구경하냐? ㅋ",
+                        "세월아 네월아~ ㅋ",
+                        "언제 따를 건데~",
+                        "나 목마르다고! ㅋ"
+                    ];
+                    bossMessage = timeoutMessages[Math.floor(Math.random() * timeoutMessages.length)];
+                    shakeTime = 400; // 화면 흔들림 효과
+                    gameOver("술을 안 따르고 멍 때리다가 쫓겨났습니다...");
+                    return;
+                }
+            }
+
+            // 2단계(score > 0)부터 잔이 좌우로 랜덤하게 움직임
+            if ((state === 'READY' || state === 'POURING') && score > 0) {
+                if (Math.abs(glassX - glassTargetX) < 5) {
+                    glassTargetX = 20 + Math.random() * (GAME_WIDTH - 80); // 새 목표 설정
+                }
+                let speed = 30 + (score * 15); // 단계별 속도 증가
+                if (glassX < glassTargetX) glassX += speed * (dt / 1000);
+                else glassX -= speed * (dt / 1000);
+            }
+
+            if (state === 'POURING') {
+                // 잔 크기가 줄어들었으므로 중심점과 조준 허용 범위 업데이트 (잔 상단 너비 절반 = 25px)
+                let glassCenterX = glassX + 25;
+                if (Math.abs(spoutX - glassCenterX) < 22) { // 판정 범위를 28에서 22로 축소 (난이도 증가)
+                    isHittingGlass = true;
+                    currentFill += 40 * (dt / 1000); // 초당 40% 차오름
+                    if (currentFill > 120) currentFill = 120; // 최대치 제한
+                } else {
+                    isHittingGlass = false;
+
+                    // 조준 빗나감: 흘린 양 증가 및 실패 판정 추가
+                    spilledAmount += 40 * (dt / 1000);
+                    if (spilledAmount > 10) { // 흘리는 허용량을 20에서 10으로 축소 (난이도 증가)
+                        const spillMessages = [
+                            "바닥이 술 다 마시네 ㅋ",
+                            "수전증 있냐? 어휴~",
+                            "내 바지에 튀었잖아!",
+                            "비싼 술 다 버리네 ㅋ",
+                            "칠칠맞게 진짜..."
+                        ];
+                        bossMessage = spillMessages[Math.floor(Math.random() * spillMessages.length)];
+                        gameOver("귀한 소주를 사방에 흘려버렸습니다...");
+                    }
+
+                    // 흘리는 파티클 추가
+                    if (Math.random() > 0.5) {
+                        particles.push({
+                            x: spoutX + (Math.random() - 0.5) * 10,
+                            y: 220, // 테이블 위로 떨어짐
+                            vx: (Math.random() - 0.5) * 4,
+                            vy: -(Math.random() * 2),
+                            life: 200
+                        });
+                    }
+                }
+            }
+
+            // 물결 애니메이션 시간 업데이트
+            liquidWaveOffset += dt * 0.01;
+
+            if (shakeTime > 0) {
+                shakeTime -= dt;
+            }
+
+            // 파티클(소주 방울) 업데이트
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.3; // 중력
+                p.life -= dt;
+                if (p.life <= 0 || p.y > 260) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        // 그리기 루프
+        function draw() {
+            // 배경 초기화
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            ctx.save();
+
+            // 화면 흔들림 효과 (실패 시 강한 흔들림)
+            if (shakeTime > 0) {
+                const dx = (Math.random() - 0.5) * 6;
+                const dy = (Math.random() - 0.5) * 6;
+                ctx.translate(dx, dy);
+            }
+
+            // 1. 배경 (식당 벽과 테이블)
+            ctx.fillStyle = '#C8B598'; // 벽지
+            ctx.fillRect(0, 0, GAME_WIDTH, 220);
+            ctx.fillStyle = '#6D4C41'; // 테이블
+            ctx.fillRect(0, 220, GAME_WIDTH, 100);
+            ctx.fillStyle = '#4E342E'; // 테이블 테두리
+            ctx.fillRect(0, 220, GAME_WIDTH, 5);
+
+            // 2. 부장님 캐릭터
+            drawBoss();
+
+            // 3. 소주잔과 내용물
+            drawGlass();
+
+            // 4. 소주병과 따르는 팔
+            drawBottle();
+
+            // 5. 파티클
+            ctx.fillStyle = '#E0F7FA';
+            for (let p of particles) {
+                ctx.fillRect(p.x, p.y, 2, 2);
+            }
+
+            // 하단 조작 안내 문구 추가
+            if (state === 'READY' || state === 'POURING') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.font = '10px "NeoDunggeunmo"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText("클릭한 채 좌우로 움직여 따르세요", GAME_WIDTH / 2, GAME_HEIGHT - 15);
+            }
+
+            // 우측 상단 점수 UI (캔버스 내부에 직접 그려서 화면 밖으로 잘림 방지)
+            if (state !== 'MENU' && panelGameover.classList.contains('hidden')) {
+                ctx.font = '14px "NeoDunggeunmo"';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'top';
+
+                // 그림자
+                ctx.fillStyle = '#000';
+                ctx.fillText(`점수: ${score}잔`, GAME_WIDTH - 9, 11);
+                // 텍스트
+                ctx.fillStyle = '#FFF';
+                ctx.fillText(`점수: ${score}잔`, GAME_WIDTH - 10, 10);
+            }
+
+            ctx.restore();
+        }
+
+        function drawBoss() {
+            // 상체 (정장) - 위치를 하단으로 30px 이동 (100 -> 130)
+            ctx.fillStyle = currentBoss.suit;
+            ctx.fillRect(5, 130, 50, 90); // 테이블(220)에 맞게 높이 조정
+            // 넥타이
+            ctx.fillStyle = currentBoss.tie;
+            ctx.fillRect(28, 130, 4, 40);
+            // 머리 (피부)
+            ctx.fillStyle = currentBoss.skin;
+            ctx.fillRect(10, 90, 40, 40);
+            // 머리카락 (2대8 가르마)
+            ctx.fillStyle = currentBoss.hair;
+            ctx.fillRect(8, 85, 44, 12);
+            ctx.fillRect(10, 97, 8, 10);
+            // 눈
+            ctx.fillStyle = '#000';
+            ctx.fillRect(18, 105, 4, 4);
+            ctx.fillRect(38, 105, 4, 4);
+
+            // 안경 (랜덤)
+            if (currentBoss.hasGlasses) {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(15, 103, 10, 8);
+                ctx.strokeRect(35, 103, 10, 8);
+                ctx.beginPath();
+                ctx.moveTo(25, 107);
+                ctx.lineTo(35, 107);
+                ctx.stroke();
+            }
+
+            // 말풍선 (머리와 함께 아래로 30px 이동)
+            if (state !== 'MENU' && bossMessage !== '') {
+                ctx.font = '12px "NeoDunggeunmo"';
+                let textWidth = ctx.measureText(bossMessage).width;
+                let bubbleW = textWidth + 24;
+                let bubbleH = 35;
+                let bubbleX = 30; // 중앙 정렬을 위해 X 좌표 유지
+                let bubbleY = 40; // 머리 위로 하향 이동 (10 -> 40)
+
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(bubbleX, bubbleY, bubbleW, bubbleH);
+
+                // 말풍선 꼬리 (아래쪽, 머리 방향으로)
+                ctx.beginPath();
+                ctx.moveTo(bubbleX + 15, bubbleY + bubbleH);
+                ctx.lineTo(bubbleX + 10, bubbleY + bubbleH + 10);
+                ctx.lineTo(bubbleX + 25, bubbleY + bubbleH);
+                ctx.fill();
+
+                // 텍스트 렌더링
+                ctx.fillStyle = '#000';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(bossMessage, bubbleX + bubbleW / 2, bubbleY + bubbleH / 2);
+            }
+        }
+
+        function drawGlass() {
+            // 소주잔 특유의 비율은 유지하되, 난이도를 위해 전체적인 크기를 소폭 축소
+            let gy = 190;
+            const gwTop = 50, gwBot = 36, gh = 45; // 상단 폭 50, 하단 폭 36, 높이 45로 축소
+            const baseH = 14; // 두꺼운 밑동 높이
+            let gx = glassX; // 이동하는 X 좌표 적용
+
+            // 수전증 효과: 3단계(2점)부터 점수가 높을수록 상사의 손과 잔이 덜덜 떨림
+            if (state === 'POURING' && score >= 2) {
+                const tremor = Math.min((score - 1) * 0.6, 5); // 최대 5px 진폭
+                gx += (Math.random() - 0.5) * tremor;
+                gy += (Math.random() - 0.5) * tremor;
+            }
+
+            // 1. 상사의 팔뚝 (손과 이어지는 부분의 각도를 자연스럽게 수정)
+            ctx.fillStyle = currentBoss.sleeve; // 정장 몸통과 구분되는 진한 소매 색상
+            ctx.beginPath();
+            ctx.moveTo(35, 150); // 상사 어깨 위치 하향 조정
+            ctx.lineTo(15, 160);
+            ctx.lineTo(gx - 10, gy + 40); // 손목 아래
+            ctx.lineTo(gx + 3, gy + 15); // 손목 위
+            ctx.fill();
+
+            // 셔츠 소맷단 디테일 (정장 소매와 손등 사이의 어색함을 흰색 셔츠로 매끄럽게 연결)
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.moveTo(gx - 11, gy + 38);
+            ctx.lineTo(gx - 7, gy + 42);
+            ctx.lineTo(gx + 4, gy + 18);
+            ctx.lineTo(gx, gy + 14);
+            ctx.fill();
+
+            // 손등 (잔 왼쪽 뒤에서 자연스럽게 쥐고 있는 형태)
+            ctx.fillStyle = currentBoss.skin; // 현재 상사의 피부톤 적용
+            ctx.fillRect(gx - 15, gy + 15, 18, 28);
+
+            // 2. 소주잔 모양 패스 생성 (메인 몸통 사다리꼴)
+            ctx.beginPath();
+            ctx.moveTo(gx, gy);
+            ctx.lineTo(gx + gwTop, gy);
+            ctx.lineTo(gx + gwTop / 2 + gwBot / 2, gy + gh);
+            ctx.lineTo(gx + gwTop / 2 - gwBot / 2, gy + gh);
+            ctx.closePath();
+
+            // 3. 안에 채워진 소주 (찰랑이는 효과)
+            if (currentFill > 0) {
+                ctx.save();
+                ctx.clip(); // 잔 모양으로 클리핑 (바깥으로 안 튀어나가게)
+
+                let fillRatio = Math.min(currentFill, 100) / 100;
+                let fillH = gh * fillRatio;
+                let liquidY = gy + gh - fillH;
+
+                ctx.fillStyle = '#E0F7FA'; // 소주 색상
+
+                // 물결 그리기 (사인파 이용)
+                ctx.beginPath();
+                ctx.moveTo(gx - 10, gy + gh); // 바닥 왼쪽 밖
+                ctx.lineTo(gx - 10, liquidY);
+
+                // 수전증 효과: 따르는 중 점수가 높을수록 진폭(찰랑거림)이 매우 커져서 수위를 알기 힘듦
+                let baseAmplitude = (state === 'POURING' && isHittingGlass) ? 3 : (score > 0 ? 1.5 : 0.5);
+                let tremorAmplitude = (state === 'POURING' && score >= 2) ? Math.min(score * 0.7, 6) : 0;
+                let amplitude = baseAmplitude + tremorAmplitude;
+
+                for (let i = -10; i <= gwTop + 10; i += 5) {
+                    let waveY = liquidY + Math.sin(i * 0.1 + liquidWaveOffset) * amplitude;
+                    ctx.lineTo(gx + i, waveY);
+                }
+
+                ctx.lineTo(gx + gwTop + 10, gy + gh); // 바닥 오른쪽 밖
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            // 4. 잔 테두리 및 밑동 렌더링
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+
+            // 메인 컵 테두리
+            ctx.beginPath();
+            ctx.moveTo(gx, gy);
+            ctx.lineTo(gx + gwTop, gy);
+            ctx.lineTo(gx + gwTop / 2 + gwBot / 2, gy + gh);
+            ctx.lineTo(gx + gwTop / 2 - gwBot / 2, gy + gh);
+            ctx.closePath();
+            ctx.stroke();
+
+            // 두꺼운 유리 바닥 (밑동) 디테일
+            const baseX1 = gx + gwTop / 2 - gwBot / 2;
+            const baseX2 = gx + gwTop / 2 + gwBot / 2;
+            const baseBotW = gwBot - 2;
+            const baseBotX1 = gx + gwTop / 2 - baseBotW / 2;
+            const baseBotX2 = gx + gwTop / 2 + baseBotW / 2;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.moveTo(baseX1, gy + gh);
+            ctx.lineTo(baseX2, gy + gh);
+            ctx.lineTo(baseBotX2, gy + gh + baseH);
+            ctx.lineTo(baseBotX1, gy + gh + baseH);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 밑동 굴곡 디테일 (줄어든 폭에 맞춰 간격 재조정)
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.moveTo(baseX1 + 8, gy + gh);
+            ctx.lineTo(baseBotX1 + 8, gy + gh + baseH);
+            ctx.moveTo(baseX1 + 18, gy + gh);
+            ctx.lineTo(baseBotX1 + 18, gy + gh + baseH);
+            ctx.moveTo(baseX1 + 28, gy + gh);
+            ctx.lineTo(baseBotX1 + 28, gy + gh + baseH);
+            ctx.stroke();
+
+            // 상사의 손가락 부분 삭제 (어색함 제거, 손등만으로 잔을 쥐고 있는 연출)
+
+            // 6. 잔 눈금 (1부 ~ 9부 표시)
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 9; i++) {
+                let ty = gy + gh - (gh * i / 10);
+                // 사다리꼴 너비에 맞춰 눈금 선 길이 계산
+                let currentWidth = gwBot + (gwTop - gwBot) * (i / 10);
+                let offsetX = (gwTop - currentWidth) / 2;
+                ctx.moveTo(gx + offsetX, ty);
+                ctx.lineTo(gx + offsetX + 4, ty);
+                ctx.moveTo(gx + offsetX + currentWidth, ty);
+                ctx.lineTo(gx + offsetX + currentWidth - 4, ty);
+            }
+            ctx.stroke();
+
+            // 100% 초과시 흘러넘치는 연출
+            if (currentFill > 100) {
+                ctx.fillStyle = '#E0F7FA';
+                ctx.fillRect(gx - 2, gy + 10, 3, 20);
+                ctx.fillRect(gx + gwTop - 1, gy + 15, 3, 30);
+            }
+        }
+
+        function drawBottle() {
+            if (state === 'POURING' || (state === 'EVALUATING' && bossMessage.includes("넘치잖아"))) {
+                // 따르는 중 (입력된 마우스/터치 위치인 spoutX를 기준으로 이동)
+                ctx.save();
+                ctx.translate(spoutX + 40, 130);
+                ctx.rotate(-Math.PI / 4);
+
+                // 소주병 몸통
+                ctx.fillStyle = '#1B5E20';
+                ctx.fillRect(-40, -15, 50, 30);
+                // 병목
+                ctx.fillRect(-60, -5, 20, 10);
+
+                // 라벨
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(-30, -10, 25, 20);
+                ctx.fillStyle = '#F44336'; // 빨간색 포인트 마크
+                ctx.fillRect(-25, -5, 15, 10);
+
+                // [수정] 2. 왼팔 (위에서 내려와 라벨을 뭉툭하게 감싸는 형태)
+                ctx.fillStyle = '#E0E0E0'; // 왼팔 소매
+                ctx.beginPath();
+                ctx.moveTo(-10, -15);
+                ctx.lineTo(30, -70);
+                ctx.lineTo(55, -50);
+                ctx.lineTo(15, -10);
+                ctx.fill();
+
+                // 왼손 (상표 부분을 넓게 덮음)
+                ctx.fillStyle = '#FFB74D';
+                ctx.fillRect(-35, -20, 28, 22);
+
+                // [수정] 1. 오른팔 (오른쪽 아래에서 병 밑동을 통째로 쥐는 형태)
+                ctx.fillStyle = '#F5F5F5'; // 오른팔 소매
+                ctx.fillRect(15, -5, 60, 26);
+
+                // 오른손 (병 밑동의 위아래를 한 번에 둥글게 감싸듯 처리)
+                ctx.fillStyle = '#FFB74D';
+                ctx.fillRect(2, -18, 16, 36);
+
+                ctx.restore();
+
+                // 쏟아지는 소주 줄기
+                if (state === 'POURING' && currentFill < 120) {
+                    ctx.fillStyle = '#E0F7FA';
+                    // 조준 여부에 따라 쏟아지는 높이 결정 (잔 높이 45, Y=190 기준)
+                    let fillH = 45 * (Math.min(currentFill, 100) / 100);
+                    let liquidTop = isHittingGlass ? 190 + 45 - fillH : 220;
+
+                    // 병 입구의 정확한 위치(Y=172)부터 그려지도록 수정하여 자연스럽게 연결
+                    ctx.fillRect(spoutX - 2, 172, 4, liquidTop - 172); // 소주 줄기
+
+                    // 물방울 파티클 생성
+                    if (Math.random() > 0.4) {
+                        particles.push({
+                            x: spoutX + (Math.random() - 0.5) * 6,
+                            y: liquidTop - 2,
+                            vx: (Math.random() - 0.5) * 6,
+                            vy: -(Math.random() * 2 + 1),
+                            life: 300
+                        });
+                    }
+                }
+            } else {
+                // 대기 중 (오른쪽에 쉬고 있는 병)
+                ctx.save();
+                ctx.translate(180, 200); // 캔버스 폭이 늘어나서 대기 위치도 우측으로 이동 (160 -> 180)
+
+                // 소주병
+                ctx.fillStyle = '#1B5E20';
+                ctx.fillRect(-15, -30, 30, 50);
+                ctx.fillRect(-5, -50, 10, 20);
+
+                // 라벨
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(-15, -15, 30, 25);
+                ctx.fillStyle = '#F44336';
+                ctx.fillRect(-5, -10, 10, 15);
+
+                // [수정] 대기 중일 때도 대충 감싸는 손으로 단순화
+                // 1. 오른팔 소매 및 손 (병 밑동 잡기)
+                ctx.fillStyle = '#F5F5F5';
+                ctx.fillRect(0, 10, 50, 22);
+                ctx.fillStyle = '#FFB74D';
+                ctx.fillRect(-5, 5, 15, 28);
+
+                // 2. 왼팔 소매 및 손 (라벨 감싸기)
+                ctx.fillStyle = '#E0E0E0';
+                ctx.beginPath();
+                ctx.moveTo(0, -10);
+                ctx.lineTo(30, -45);
+                ctx.lineTo(50, -30);
+                ctx.lineTo(15, 5);
+                ctx.fill();
+
+                ctx.fillStyle = '#FFB74D';
+                ctx.fillRect(-18, -15, 36, 18);
+
+                ctx.restore();
+            }
+        }
+
+        // 메인 게임 루프
+        function gameLoop(timestamp) {
+            let dt = timestamp - lastTime;
+            lastTime = timestamp;
+            if (dt > 100) dt = 100; // 탭 전환 시 시간 튀는 현상 방지
+
+            update(dt);
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 폰트가 로드된 후 시작
+        document.fonts.ready.then(() => {
+            resize();
+            requestAnimationFrame(gameLoop);
+        });
+
+    </script>
+</body>
+
+</html>

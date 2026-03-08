@@ -219,6 +219,12 @@
         }
 
         /* 티슈 게임 썸네일 배경 */
+        .thumb-soju {
+            background-image: url('/assets/images/thumb-soju.png');
+            background-size: cover;
+            background-position: center;
+        }
+
         .thumb-tissue {
             background-image: url('/assets/images/thumb-tissue.png');
             background-size: cover;
@@ -366,6 +372,20 @@
 
         <main>
             <div class="games-grid">
+
+                <!-- 막내의 소주따르기 게임 -->
+                <a href="/games/soju/" class="game-card active" id="card-soju">
+                    <div class="play-badge">PLAY</div>
+                    <div class="card-thumbnail-wrap">
+                        <div class="card-thumbnail thumb-soju"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-tag"># CASUAL</span>
+                        <h2 class="card-title">막내의 눈물나는 소주따르기</h2>
+                        <p class="card-desc">대망의 입사 후 첫 회식날. 상사의 지시에 맞춰 소주를 완벽하게 따르세요!</p>
+                        <span class="card-tag" id="count-soju" style="color: #a5d6a7; margin-top:10px;">... PLAY</span>
+                    </div>
+                </a>
 
                 <!-- 티슈 뽑기 게임 -->
                 <a href="/games/tissue-pull/" class="game-card active" id="card-tissue">

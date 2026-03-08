@@ -396,10 +396,11 @@
         // 초기화
         function init() {
             startBtn.addEventListener('click', () => {
-                trackPlayCount("brisket-master");
+                trackPlayCount("brisket-master", true);
                 resetGame(true);
             });
             nextBtn.addEventListener('click', () => {
+                trackPlayCount("brisket-master", true);
                 resetGame(resultStatus.innerText === '실패' || resultStatus.innerText === 'CLEAR!');
             });
 

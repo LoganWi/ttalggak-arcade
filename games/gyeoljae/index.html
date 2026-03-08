@@ -691,6 +691,7 @@
             failOverlay.classList.remove('show');
             if (fullReset) {
                 currentRound = 1;
+                trackPlayCount("gyeoljae", true);
                 failTitleText.innerText = 'FAIL';
                 failTitleText.style.color = '#ef4444';
                 resetBtn.innerText = 'RESTART';
@@ -730,7 +731,6 @@
                 }, 3500);
             }
 
-            trackPlayCount("gyeoljae");
             // 서류 뭉치 개수도 늘림
             for (let i = 0; i < 30; i++) papers.push(new Paper(x, y, z, vx, vy, vz));
             for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, boss.z));

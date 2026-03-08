@@ -591,7 +591,7 @@
         function popTissue(vx, vy) {
             if (isGameOver) return;
             score++;
-            if (score === 1) trackPlayCount("tissue-pull");
+            if (score === 1) trackPlayCount("tissue-pull", true);
 
             updateAutoSuggestVisibility();
             const remaining = MAX_TISSUES - score;
