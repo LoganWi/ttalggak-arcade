@@ -11,11 +11,10 @@
     <meta property="og:image" content="https://ttalggak-arcade.vercel.app/assets/images/thumb-main.png">
     <meta property="og:url" content="https://ttalggak-arcade.vercel.app/">
     <meta property="og:type" content="website">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700;900&display=swap"
         rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@latest/neodgm/style.css" rel="stylesheet">
     <style>
         *,
         *::before,
@@ -41,7 +40,7 @@
             background-image:
                 radial-gradient(ellipse 80% 50% at 50% -20%, rgba(184, 79, 255, 0.25) 0%, transparent 70%),
                 linear-gradient(180deg, #0a0a1a 0%, #0d0d2b 100%);
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
             color: #fff;
             overflow-x: hidden;
         }
@@ -64,18 +63,34 @@
             z-index: 0;
         }
 
-        /* 상단 스캔라인 그리드 */
+        /* 3D 사이버 그리드 */
         body::after {
             content: '';
             position: fixed;
-            inset: 0;
-            background-image: repeating-linear-gradient(0deg,
-                    transparent,
-                    transparent 3px,
-                    rgba(0, 0, 0, 0.08) 3px,
-                    rgba(0, 0, 0, 0.08) 4px);
+            bottom: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image:
+                linear-gradient(rgba(0, 245, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(0);
+            animation: gridMove 10s linear infinite;
             pointer-events: none;
             z-index: 0;
+            mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 60%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 60%);
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: perspective(500px) rotateX(60deg) translateY(0);
+            }
+
+            100% {
+                transform: perspective(500px) rotateX(60deg) translateY(50px);
+            }
         }
 
         .container {
@@ -100,53 +115,30 @@
         .logo-subtitle {
             font-family: 'Press Start 2P', monospace;
             font-size: 11px;
-            color: var(--neon-cyan);
+            color: #fff;
             letter-spacing: 4px;
             text-transform: uppercase;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
             display: block;
-            animation: blink 1.5s step-end infinite;
-        }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
         }
 
         .logo-title {
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(22px, 5vw, 42px);
-            line-height: 1.4;
-            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-purple) 50%, var(--neon-cyan) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(255, 45, 120, 0.6));
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes titleGlow {
-            from {
-                filter: drop-shadow(0 0 15px rgba(255, 45, 120, 0.5)) drop-shadow(0 0 30px rgba(184, 79, 255, 0.3));
-            }
-
-            to {
-                filter: drop-shadow(0 0 25px rgba(0, 245, 255, 0.6)) drop-shadow(0 0 50px rgba(184, 79, 255, 0.5));
-            }
-        }
-
-        .logo-desc {
-            margin-top: 20px;
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: clamp(28px, 6vw, 48px);
             font-weight: 400;
+            line-height: 1.4;
+            letter-spacing: 2px;
+            color: #ffeb3b;
+            -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.7);
+            text-shadow:
+                0px 2px 0px #e53935,
+                0px 4px 0px #e53935,
+                0px 6px 0px #b71c1c,
+                0px 8px 0px #b71c1c,
+                0px 10px 0px rgba(0, 0, 0, 0.8),
+                0px 15px 25px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
         }
 
         /* 구분선 */
@@ -182,20 +174,22 @@
         /* 게임 카드 */
         .game-card {
             position: relative;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            background: rgba(18, 18, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             overflow: hidden;
             text-decoration: none;
             color: inherit;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            transition: transform 0.5s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
             display: block;
+            transform-style: preserve-3d;
         }
 
         .game-card.active:hover {
-            transform: translateY(-6px) scale(1.01);
-            box-shadow: 0 20px 60px rgba(255, 45, 120, 0.35), 0 0 0 1px var(--neon-pink);
-            border-color: var(--neon-pink);
+            box-shadow: 0 20px 40px rgba(255, 45, 120, 0.25), 0 0 0 1px rgba(255, 45, 120, 0.7);
+            border-color: rgba(255, 45, 120, 0.7);
         }
 
         .game-card.active:hover .card-thumbnail {
@@ -206,6 +200,23 @@
             height: 180px;
             overflow: hidden;
             position: relative;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* 썸네일 영역 스켈레톤 애니메이션 */
+        .card-thumbnail-wrap::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.15),
+                    transparent);
+            animation: skeleton-sweep 1.5s infinite ease-in-out;
+            pointer-events: none;
         }
 
         .card-thumbnail {
@@ -262,6 +273,7 @@
             font-size: 8px;
             padding: 5px 10px;
             border-radius: 20px;
+            transition: opacity 0.3s ease;
         }
 
         .play-badge {
@@ -278,6 +290,14 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 로딩 중일 때는 배지 숨김 */
+        .game-card.is-loading .play-badge,
+        .game-card.is-loading .coming-badge {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .play-badge::before {
@@ -290,12 +310,19 @@
             border-top: 1px solid var(--card-border);
         }
 
-        .card-tag {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 8px;
-            color: var(--neon-cyan);
+        /* 태그 래퍼: 여러 태그를 가로로 배치 */
+        .tags-wrap {
+            display: flex;
+            gap: 8px;
             margin-bottom: 10px;
-            display: block;
+        }
+
+        .card-tag {
+            font-family: 'NeoDunggeunmo', 'Press Start 2P', monospace;
+            font-size: 14px;
+            color: var(--neon-cyan);
+            display: inline-block;
+            letter-spacing: 0.5px;
         }
 
         .card-title {
@@ -342,6 +369,8 @@
             color: var(--neon-yellow);
         }
 
+
+
         @media (max-width: 480px) {
             header {
                 padding: 40px 0 30px;
@@ -362,9 +391,8 @@
     <div class="container">
         <header>
             <div class="logo-wrap">
-                <span class="logo-subtitle">INSERT COIN TO PLAY</span>
-                <h1 class="logo-title">딸깍아케이드</h1>
-                <p class="logo-desc">클릭 한 번으로 떠나는 아케이드 세계 🕹️</p>
+                <span class="logo-subtitle">HYPER-CASUAL HUB</span>
+                <h1 class="logo-title">TTALGGAK ARCADE</h1>
             </div>
         </header>
 
@@ -373,78 +401,7 @@
         <main>
             <div class="games-grid">
 
-                <!-- 막내의 소주따르기 게임 -->
-                <a href="/games/soju/" class="game-card active" id="card-soju">
-                    <div class="play-badge">PLAY</div>
-                    <div class="card-thumbnail-wrap">
-                        <div class="card-thumbnail thumb-soju"></div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-tag"># CASUAL</span>
-                        <h2 class="card-title">막내의 눈물나는 소주따르기</h2>
-                        <p class="card-desc">대망의 입사 후 첫 회식날. 상사의 지시에 맞춰 소주를 완벽하게 따르세요!</p>
-                        <span class="card-tag" id="count-soju" style="color: #a5d6a7; margin-top:10px;">... PLAY</span>
-                    </div>
-                </a>
-
-                <!-- 티슈 뽑기 게임 -->
-                <a href="/games/tissue-pull/" class="game-card active" id="card-tissue">
-                    <div class="play-badge">PLAY</div>
-                    <div class="card-thumbnail-wrap">
-                        <div class="card-thumbnail thumb-tissue"></div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-tag"># CASUAL</span>
-                        <h2 class="card-title">티슈 마구마구 뽑기</h2>
-                        <p class="card-desc">위로 스와이프해서 티슈를 뽑아보세요! 연속 뽑기와 선풍기 모드까지.</p>
-                        <span class="card-tag" id="count-tissue" style="color: #a8edea; margin-top:10px;">...
-                            PLAY</span>
-                    </div>
-                </a>
-
-                <!-- 결재해 주세요! 게임 -->
-                <a href="/games/gyeoljae/" class="game-card active" id="card-gyeoljae">
-                    <div class="play-badge">PLAY</div>
-                    <div class="card-thumbnail-wrap">
-                        <div class="card-thumbnail thumb-gyeoljae"></div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-tag"># ACTION</span>
-                        <h2 class="card-title">결재해 주세요!</h2>
-                        <p class="card-desc">결재판을 아래로 당겨 부장님께 날려버리세요! 3D 슬링샷 액션.</p>
-                        <span class="card-tag" id="count-gyeoljae" style="color: #ff9a9e; margin-top:10px;">...
-                            PLAY</span>
-                    </div>
-                </a>
-
-                <!-- 차돌박이 게임 -->
-                <a href="/games/brisket-master/" class="game-card active" id="card-brisket-master">
-                    <div class="play-badge">PLAY</div>
-                    <div class="card-thumbnail-wrap">
-                        <div class="card-thumbnail thumb-brisket-master"></div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-tag"># ACTION</span>
-                        <h2 class="card-title">부장님의 차돌박이</h2>
-                        <p class="card-desc">화면을 터치해 종잇장처럼 얇은 차돌박이를 썰어보세요!</p>
-                        <span class="card-tag" id="count-brisket-master" style="color: #ffb347; margin-top:10px;">...
-                            PLAY</span>
-                    </div>
-                </a>
-
-                <!-- 곧 출시 -->
-                <div class="game-card coming-soon" id="card-coming-1">
-                    <div class="coming-badge">COMING SOON</div>
-                    <div class="card-thumbnail-wrap">
-                        <div class="card-thumbnail" style="background: linear-gradient(135deg, #1a2a1a, #1a3a2a);">❓
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <span class="card-tag"># ???</span>
-                        <h2 class="card-title">다음 게임</h2>
-                        <p class="card-desc">현재 개발 중입니다. 곧 만나볼 수 있어요!</p>
-                    </div>
-                </div>
+                <!-- main.js에서 JS 동적 렌더링으로 카드를 주입합니다 -->
 
             </div>
         </main>
