@@ -601,9 +601,9 @@
             const baseH = 14; // 두꺼운 밑동 높이
             let gx = glassX; // 이동하는 X 좌표 적용
 
-            // 수전증 효과: 3단계(2점)부터 점수가 높을수록 상사의 손과 잔이 덜덜 떨림
-            if (state === 'POURING' && score >= 2) {
-                const tremor = Math.min((score - 1) * 0.6, 5); // 최대 5px 진폭
+            // 수전증 효과: 11단계(10점)부터 점수가 높을수록 상사의 손과 잔이 덜덜 떨림
+            if (state === 'POURING' && score >= 10) {
+                const tremor = Math.min((score - 9) * 0.6, 5); // 최대 5px 진폭 (10점일 때 0.6부터 시작)
                 gx += (Math.random() - 0.5) * tremor;
                 gy += (Math.random() - 0.5) * tremor;
             }
@@ -656,7 +656,7 @@
 
                 // 수전증 효과: 따르는 중 점수가 높을수록 진폭(찰랑거림)이 매우 커져서 수위를 알기 힘듦
                 let baseAmplitude = (state === 'POURING' && isHittingGlass) ? 3 : (score > 0 ? 1.5 : 0.5);
-                let tremorAmplitude = (state === 'POURING' && score >= 2) ? Math.min(score * 0.7, 6) : 0;
+                let tremorAmplitude = (state === 'POURING' && score >= 10) ? Math.min((score - 9) * 0.7, 6) : 0; // 10점부터 찰랑거림 추가
                 let amplitude = baseAmplitude + tremorAmplitude;
 
                 for (let i = -10; i <= gwTop + 10; i += 5) {
