@@ -49,35 +49,54 @@
         }
 
         .panel {
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
+            /* 조금 더 진하게 */
             border: 4px solid #fff;
-            padding: 24px;
+            padding: 32px;
+            /* 패딩 확장 (답답함 해소) */
             text-align: center;
             pointer-events: auto;
             color: white;
             max-width: 95%;
-            width: 360px;
-            /* 너비를 약간 넓혀서 텍스트 줄바꿈 방지 */
+            width: 380px;
+            /* 너비 소폭 확장 */
             word-break: keep-all;
-            /* 단어 단위로 줄바꿈 되도록 처리 */
             position: relative;
         }
 
         button {
             background-color: #2E7D32;
             color: white;
-            border: 2px solid #A5D6A7;
-            padding: 12px 80px;
-            /* 버튼 좌우 여백을 더욱 넉넉하게 확장 */
+            border: 4px solid #A5D6A7;
+            padding: 28px 0;
+            /* 세로 높이 추가 상향 */
+            width: 100%;
             font-family: 'NeoDunggeunmo', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.6rem;
+            /* 글자 크기 추가 상향 */
+            line-height: 1;
             cursor: pointer;
-            margin-top: 16px;
-            transition: transform 0.1s;
+            transition: all 0.1s;
+            box-shadow: 0 6px 0 #1B5E20;
+            /* 입체감 강화 */
+            position: relative;
+            display: block;
+        }
+
+        .btn-secondary {
+            background-color: #444;
+            border-color: #777;
+            box-shadow: 0 6px 0 #222;
         }
 
         button:active {
-            transform: scale(0.95);
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1B5E20;
+        }
+
+        .btn-secondary:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #222;
         }
 
         /* 메인으로 돌아가기 버튼 */
@@ -103,6 +122,59 @@
         .btn-home:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
+
+        /* 랭킹 패널 스타일 */
+        .leaderboard-panel {
+            max-height: 85vh;
+            width: 380px;
+            /* 메인 패널과 너비 통일 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .rank-number {
+            width: 30px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .rank-name {
+            flex: 1;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .rank-score {
+            font-weight: bold;
+            color: #fde047;
+        }
+
+        /* 닉네임 입력 모달 */
+        #panelNickname {
+            z-index: 100;
+        }
+
+        input {
+            background: #1f2937;
+            border: 2px solid #4b5563;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            /* 버튼과의 여백 추가 */
+            font-family: 'NeoDunggeunmo', sans-serif;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 
@@ -121,17 +193,21 @@
         <!-- 시작 화면 -->
         <div id="panelMenu" class="panel">
             <h1 class="text-3xl font-bold mb-4 text-green-400">막내의 눈물나는<br>소주따르기</h1>
-            <p class="text-sm mb-4 leading-relaxed">
+            <p class="text-base mb-4 leading-relaxed">
                 대망의 입사 후 첫 회식날.<br>
                 면접 때 소주 기가 막히게 따른다고<br>
                 어필해서 합격했는데... 증명해내자!
             </p>
-            <div class="text-left text-xs text-gray-300 mb-4 bg-gray-800 p-2 rounded border border-gray-600">
+            <div class="text-left text-base text-gray-300 mb-4 bg-gray-800 p-3 rounded border border-gray-600">
                 [게임 규칙]<br>
                 상사가 지시하는 'n부' 높이에 맞춰 소주를 따르세요.<br>
                 (예: 7부 = 잔의 70% 높이)
             </div>
-            <button id="btnStart">회식 시작</button>
+            <div class="flex flex-col gap-4 mt-4">
+                <button id="btnStart">회식 시작</button>
+                <button id="btnShowLeaderboard" class="btn-secondary">전체 랭킹</button>
+                <p id="topScoreInfo" class="text-base text-yellow-300 font-bold min-h-[24px]"></p>
+            </div>
         </div>
 
         <!-- 게임 오버 화면 -->
@@ -139,12 +215,34 @@
             <h1 class="text-3xl font-bold mb-4 text-red-400">해고 통보</h1>
             <p id="failMessage" class="text-lg mb-4"></p>
             <p id="finalScore" class="text-xl text-yellow-300 mb-6"></p>
-            <button id="btnRestart">다시 도전</button>
+            <div class="flex flex-col gap-4 mt-4">
+                <button id="btnRestart">다시 도전</button>
+                <button id="btnShowLeaderboardEnd" class="btn-secondary">랭킹 확인</button>
+            </div>
+        </div>
+
+        <!-- 닉네임 입력 화면 -->
+        <div id="panelNickname" class="panel hidden">
+            <h1 class="text-2xl font-bold mb-4 text-yellow-400">영업왕 등극!</h1>
+            <p class="text-base mb-4">최고 기록을 달성했습니다!<br>랭킹에 등록할 이름을 입력하세요.</p>
+            <input type="text" id="inputNickname" maxlength="8" placeholder="최대 8글자">
+            <button id="btnSubmitScore">등록하기</button>
+        </div>
+
+        <!-- 랭킹 화면 -->
+        <div id="panelLeaderboard" class="panel leaderboard-panel hidden">
+            <h1 class="text-2xl font-bold mb-4 text-green-400">명예의 전당</h1>
+            <div id="leaderboardList" class="mb-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- 랭킹 데이터가 여기에 삽입됨 -->
+                <p class="text-base">데이터 불러오는 중...</p>
+            </div>
+            <button id="btnCloseLeaderboard" class="btn-secondary">뒤로 가기</button>
         </div>
     </div>
 
     <script type="module">
         import { trackPlayCount } from '../../api-playcount.js';
+        import { getUserId, getUserNickname, submitScore, getLeaderboard } from '../../api-leaderboard.js';
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -152,10 +250,21 @@
         // UI Elements
         const panelMenu = document.getElementById('panelMenu');
         const panelGameover = document.getElementById('panelGameover');
+        const panelNickname = document.getElementById('panelNickname');
+        const panelLeaderboard = document.getElementById('panelLeaderboard');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const inputNickname = document.getElementById('inputNickname');
+
         const btnStart = document.getElementById('btnStart');
         const btnRestart = document.getElementById('btnRestart');
+        const btnShowLeaderboard = document.getElementById('btnShowLeaderboard');
+        const btnShowLeaderboardEnd = document.getElementById('btnShowLeaderboardEnd');
+        const btnCloseLeaderboard = document.getElementById('btnCloseLeaderboard');
+        const btnSubmitScore = document.getElementById('btnSubmitScore');
+
         const failMessage = document.getElementById('failMessage');
         const finalScore = document.getElementById('finalScore');
+        const topScoreInfo = document.getElementById('topScoreInfo');
 
         // 게임 내부 해상도 (폭을 늘려 점수 UI와 전체적인 화면이 잘 담기도록 수정)
         const GAME_WIDTH = 220;
@@ -164,7 +273,7 @@
         // 게임 상태 관리
         let state = 'MENU'; // MENU, READY, POURING, EVALUATING, GAMEOVER
         let score = 0;
-        let bestScore = 0;
+        let bestScore = parseInt(localStorage.getItem('soju_bestScore')) || 0;
         let targetBu = 5;
         let currentFill = 0;
         let bossMessage = '';
@@ -325,14 +434,98 @@
 
         function gameOver(reason) {
             state = 'GAMEOVER';
-            if (score > bestScore) bestScore = score;
+
+            // 최고 기록 갱신 여부 확인
+            const isNewBest = score > bestScore && score > 0;
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('soju_bestScore', bestScore);
+            }
 
             setTimeout(() => {
                 failMessage.innerText = reason;
                 finalScore.innerText = `최종: ${score}잔\n최고 기록: ${bestScore}잔`;
-                panelGameover.classList.remove('hidden');
+
+                if (isNewBest) {
+                    // 신기록 달성 시 닉네임 입력창 띄우기
+                    panelNickname.classList.remove('hidden');
+                    inputNickname.value = getUserNickname();
+
+                    // 조금의 지연을 주어 확실하게 포커스 (모든 브라우저 대응)
+                    setTimeout(() => {
+                        inputNickname.focus();
+                        inputNickname.select(); // 기존 텍스트가 있으면 드래그 선택 상태로
+                    }, 100);
+                } else {
+                    panelGameover.classList.remove('hidden');
+                }
             }, 1500);
         }
+
+        // 랭킹 관련 함수들
+        async function loadLeaderboard() {
+            // 다른 패널들 숨기기 (페이지 전환 효과)
+            panelMenu.classList.add('hidden');
+            panelGameover.classList.add('hidden');
+
+            leaderboardList.innerHTML = '<p class="text-base">데이터 불러오는 중...</p>';
+            panelLeaderboard.classList.remove('hidden');
+
+            const data = await getLeaderboard('soju');
+            if (data.length === 0) {
+                leaderboardList.innerHTML = '<p class="text-base font-bold text-gray-400 mt-10">등록된 랭킹이 없습니다.</p>';
+                return;
+            }
+
+            leaderboardList.innerHTML = data.map(item => `
+                <div class="rank-item ${item.id === getUserId() ? 'bg-white/10 rounded px-2' : ''}">
+                    <span class="rank-number">${item.rank}</span>
+                    <span class="rank-name">${item.nickname}</span>
+                    <span class="rank-score">${item.score}잔</span>
+                </div>
+            `).join('');
+        }
+
+        async function handleScoreSubmission() {
+            const nickname = inputNickname.value.trim();
+            if (!nickname) {
+                alert('닉네임을 입력해주세요!');
+                return;
+            }
+
+            btnSubmitScore.disabled = true;
+            btnSubmitScore.innerText = '등록 중...';
+
+            const success = await submitScore('soju', nickname, score);
+
+            btnSubmitScore.disabled = false;
+            btnSubmitScore.innerText = '등록하기';
+
+            if (success) {
+                panelNickname.classList.add('hidden');
+                loadLeaderboard();
+                updateTopScoreDisplay(); // 1등 정보 갱신
+            } else {
+                alert('등록에 실패했습니다. 다시 시도해주세요.');
+            }
+        }
+
+        async function updateTopScoreDisplay() {
+            try {
+                const data = await getLeaderboard('soju', 1);
+                if (data && data.length > 0) {
+                    topScoreInfo.innerText = `현재 1등: ${data[0].nickname} (${data[0].score}잔)`;
+                } else {
+                    topScoreInfo.innerText = '첫 1등을 차지해보세요!';
+                }
+            } catch (e) {
+                console.error("Top score fetch error:", e);
+                topScoreInfo.innerText = '';
+            }
+        }
+
+        // 초기 실행
+        updateTopScoreDisplay();
 
         // 입력 위치 계산 (게임 해상도 기준)
         function getGameX(clientX) {
@@ -383,6 +576,21 @@
 
         btnStart.addEventListener('click', startGame);
         btnRestart.addEventListener('click', startGame);
+
+        btnShowLeaderboard.addEventListener('click', loadLeaderboard);
+        btnShowLeaderboardEnd.addEventListener('click', loadLeaderboard);
+        btnCloseLeaderboard.addEventListener('click', () => {
+            panelLeaderboard.classList.add('hidden');
+            if (state === 'GAMEOVER') {
+                panelGameover.classList.remove('hidden');
+            } else {
+                panelMenu.classList.remove('hidden');
+            }
+        });
+        btnSubmitScore.addEventListener('click', handleScoreSubmission);
+        inputNickname.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleScoreSubmission();
+        });
 
         // 업데이트 루프
         function update(dt) {
@@ -513,7 +721,7 @@
             // 하단 조작 안내 문구 추가
             if (state === 'READY' || state === 'POURING') {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.font = '10px "NeoDunggeunmo"';
+                ctx.font = '10px "NeoDunggeunmo"'; // 12 -> 10
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText("클릭한 채 좌우로 움직여 따르세요", GAME_WIDTH / 2, GAME_HEIGHT - 15);
@@ -521,7 +729,7 @@
 
             // 우측 상단 점수 UI (캔버스 내부에 직접 그려서 화면 밖으로 잘림 방지)
             if (state !== 'MENU' && panelGameover.classList.contains('hidden')) {
-                ctx.font = '14px "NeoDunggeunmo"';
+                ctx.font = '14px "NeoDunggeunmo"'; // 16 -> 14
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'top';
 
@@ -571,10 +779,10 @@
             if (state !== 'MENU' && bossMessage !== '') {
                 ctx.font = '12px "NeoDunggeunmo"';
                 let textWidth = ctx.measureText(bossMessage).width;
-                let bubbleW = textWidth + 24;
-                let bubbleH = 35;
-                let bubbleX = 30; // 중앙 정렬을 위해 X 좌표 유지
-                let bubbleY = 40; // 머리 위로 하향 이동 (10 -> 40)
+                let bubbleW = textWidth + 16;
+                let bubbleH = 26;
+                let bubbleX = 30;
+                let bubbleY = 46; // 머리 위쪽으로 더 가깝게 조정 (32 -> 46) 
 
                 ctx.fillStyle = '#FFF';
                 ctx.fillRect(bubbleX, bubbleY, bubbleW, bubbleH);
