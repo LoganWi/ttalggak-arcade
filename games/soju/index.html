@@ -217,6 +217,7 @@
             <p id="finalScore" class="text-xl text-yellow-300 mb-6"></p>
             <div class="flex flex-col gap-4 mt-4">
                 <button id="btnRestart">다시 도전</button>
+                <button id="btnShare" class="btn-secondary">결과 공유하기</button>
                 <button id="btnShowLeaderboardEnd" class="btn-secondary">랭킹 확인</button>
             </div>
         </div>
@@ -257,6 +258,7 @@
 
         const btnStart = document.getElementById('btnStart');
         const btnRestart = document.getElementById('btnRestart');
+        const btnShare = document.getElementById('btnShare');
         const btnShowLeaderboard = document.getElementById('btnShowLeaderboard');
         const btnShowLeaderboardEnd = document.getElementById('btnShowLeaderboardEnd');
         const btnCloseLeaderboard = document.getElementById('btnCloseLeaderboard');
@@ -524,6 +526,27 @@
             }
         }
 
+        async function shareResult() {
+            const shareData = {
+                title: '딸깍 아케이드 - 막내의 소주따르기',
+                text: `[막내의 소주따르기] 내가 바로 이 구역의 영업왕! 점심 회식에서 ${score}잔을 따랐습니다. 당신도 도전해보시겠습니까?`,
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Fallback: Clipboard copy
+                    const fullText = `${shareData.text}\n${shareData.url}`;
+                    await navigator.clipboard.writeText(fullText);
+                    alert('결과가 클립보드에 복사되었습니다! 카톡 등에 붙여넣어 공유하세요.');
+                }
+            } catch (err) {
+                console.error('Share error:', err);
+            }
+        }
+
         // 초기 실행
         updateTopScoreDisplay();
 
@@ -588,6 +611,7 @@
             }
         });
         btnSubmitScore.addEventListener('click', handleScoreSubmission);
+        btnShare.addEventListener('click', shareResult);
         inputNickname.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleScoreSubmission();
         });
