@@ -217,7 +217,6 @@
     </a>
 
     <canvas id="gameCanvas"></canvas>
-    <button id="btnResetData" class="btn-reset-test">초기화(TEST)</button>
 
     <div id="ui" class="ui-layer">
         <!-- 시작 화면 -->
@@ -709,12 +708,6 @@
         });
         btnSubmitScore.addEventListener('click', handleScoreSubmission);
         btnShare.addEventListener('click', shareResult);
-        document.getElementById('btnResetData').addEventListener('click', () => {
-            if (confirm('로컬 데이터를 초기화하고 페이지를 새로고침하시겠습니까? (테스트용)')) {
-                localStorage.clear();
-                location.reload();
-            }
-        });
         inputNickname.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleScoreSubmission();
         });
