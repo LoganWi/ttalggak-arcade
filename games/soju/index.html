@@ -841,7 +841,7 @@
             // 하단 조작 안내 문구 추가
             if (state === 'READY' || state === 'POURING') {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.font = '14px "NeoDunggeunmo"'; // 10 -> 14
+                ctx.font = '10px "NeoDunggeunmo"'; // 14 -> 10
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText("클릭한 채 좌우로 움직여 따르세요", GAME_WIDTH / 2, GAME_HEIGHT - 15);
@@ -864,13 +864,13 @@
 
                 // "TAP!" 텍스트 가이드
                 ctx.fillStyle = '#FFFF00';
-                ctx.font = 'bold 16px "NeoDunggeunmo"'; // 12 -> 16
+                ctx.font = 'bold 12px "NeoDunggeunmo"'; // 16 -> 12
                 ctx.fillText("TAP!", gx, gy - radius - 10);
             }
 
             // 우측 상단 점수 UI (캔버스 내부에 직접 그려서 화면 밖으로 잘림 방지)
             if (state !== 'MENU' && panelGameover.classList.contains('hidden')) {
-                ctx.font = '18px "NeoDunggeunmo"'; // 14 -> 18
+                ctx.font = '14px "NeoDunggeunmo"'; // 18 -> 14
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'top';
 
@@ -918,7 +918,7 @@
 
             // 말풍선 (머리와 함께 아래로 30px 이동)
             if (state !== 'MENU' && bossMessage !== '') {
-                ctx.font = '16px "NeoDunggeunmo"'; // 12 -> 16
+                ctx.font = '12px "NeoDunggeunmo"'; // 16 -> 12
                 let textWidth = ctx.measureText(bossMessage).width;
                 let bubbleW = textWidth + 16;
                 let bubbleH = 26;
