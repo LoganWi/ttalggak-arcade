@@ -847,6 +847,27 @@
                 ctx.fillText("클릭한 채 좌우로 움직여 따르세요", GAME_WIDTH / 2, GAME_HEIGHT - 15);
             }
 
+            // [추가] 시작 시 유리잔 클릭 유도 가이드 (Pulsing Indicator) - 1라운드(score 0)에서만 표시
+            if (state === 'READY' && score === 0) {
+                const gx = glassX + 25;
+                const gy = 190 + 22; // 잔의 중간 높이 부근
+                const pulse = Math.sin(readyTime * 0.008) * 5;
+                const radius = 25 + pulse;
+
+                ctx.beginPath();
+                ctx.arc(gx, gy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 255, 0, ${0.4 + Math.sin(readyTime * 0.008) * 0.2})`;
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 3]); // 점선 효과
+                ctx.stroke();
+                ctx.setLineDash([]); // 다시 실선으로 복구
+
+                // "TAP!" 텍스트 가이드
+                ctx.fillStyle = '#FFFF00';
+                ctx.font = 'bold 12px "NeoDunggeunmo"';
+                ctx.fillText("TAP!", gx, gy - radius - 10);
+            }
+
             // 우측 상단 점수 UI (캔버스 내부에 직접 그려서 화면 밖으로 잘림 방지)
             if (state !== 'MENU' && panelGameover.classList.contains('hidden')) {
                 ctx.font = '14px "NeoDunggeunmo"'; // 16 -> 14
