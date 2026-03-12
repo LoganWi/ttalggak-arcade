@@ -81,10 +81,21 @@ export async function getLeaderboard(gameId, limitNum = 20) {
             return b.score - a.score;
         });
 
-        // 순위 매기기
+        // 순위 매기기 (공동 순위 처리)
         let rank = 1;
-        leaderboard.forEach(item => {
-            item.rank = rank++;
+        let lastScore = -1;
+        let skip = 0;
+
+        leaderboard.forEach((item, index) => {
+            if (item.score === lastScore) {
+                item.rank = rank;
+                skip++;
+            } else {
+                rank = rank + skip;
+                item.rank = rank;
+                lastScore = item.score;
+                skip = 1;
+            }
         });
 
         return leaderboard;

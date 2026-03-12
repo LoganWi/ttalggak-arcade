@@ -123,6 +123,26 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
+        .btn-reset-test {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 20;
+            pointer-events: auto;
+        }
+
+        .btn-reset-test:hover {
+            background: rgba(255, 0, 0, 0.5);
+            color: white;
+        }
+
         /* 랭킹 패널 스타일 */
         .leaderboard-panel {
             max-height: 85vh;
@@ -162,18 +182,27 @@
             z-index: 100;
         }
 
-        input {
+        #inputNickname {
             background: #1f2937;
             border: 2px solid #4b5563;
             color: white;
             padding: 12px;
             width: 100%;
             text-align: center;
-            margin-top: 10px;
-            margin-bottom: 32px;
-            /* 20px -> 32px 여백 대폭 추가 */
+            margin-top: 8px;
+            margin-bottom: 24px !important;
+            /* 60px -> 24px 여백 최적화 */
             font-family: 'NeoDunggeunmo', sans-serif;
             font-size: 1.1rem;
+            display: block;
+        }
+
+        .my-rank-info {
+            background: rgba(253, 224, 71, 0.1);
+            border: 1px dashed #fde047;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
         }
     </style>
 </head>
@@ -188,6 +217,7 @@
     </a>
 
     <canvas id="gameCanvas"></canvas>
+    <button id="btnResetData" class="btn-reset-test">초기화(TEST)</button>
 
     <div id="ui" class="ui-layer">
         <!-- 시작 화면 -->
@@ -210,31 +240,45 @@
             </div>
         </div>
 
-        <!-- 게임 오버 화면 -->
+        <!-- 게임 종료 통보 (짧은 연출용) -->
         <div id="panelGameover" class="panel hidden">
             <h1 class="text-3xl font-bold mb-4 text-red-400">해고 통보</h1>
             <p id="failMessage" class="text-lg mb-4"></p>
-            <p id="finalScore" class="text-xl text-yellow-300 mb-6"></p>
-            <div class="flex flex-col gap-4 mt-4">
+            <div class="mt-4 text-gray-400 text-sm animate-pulse">화면을 터치하여 계속...</div>
+        </div>
+
+        <!-- 결과 요약 페이지 (새로 추가) -->
+        <div id="panelResults" class="panel hidden">
+            <h1 class="text-3xl font-bold mb-6 text-yellow-400">회식 결과</h1>
+            <div class="bg-gray-800/50 p-6 rounded-lg border border-gray-700 mb-6">
+                <p id="resultScore" class="text-2xl text-white mb-2"></p>
+                <p id="resultBest" class="text-lg text-gray-400"></p>
+            </div>
+            <div class="flex flex-col gap-4">
                 <button id="btnRestart">다시 도전</button>
                 <button id="btnShare" class="btn-secondary">결과 공유하기</button>
                 <button id="btnShowLeaderboardEnd" class="btn-secondary">랭킹 확인</button>
             </div>
         </div>
 
-        <!-- 닉네임 입력 화면 -->
+        <!-- 전용 닉네임 입력 화면 -->
         <div id="panelNickname" class="panel hidden">
-            <h1 class="text-2xl font-bold mb-4 text-yellow-400">축! 신기록 달성</h1>
-            <p class="text-base mb-4">최고 기록을 달성했습니다!<br>랭킹에 등록할 이름을 입력하세요.</p>
-            <input type="text" id="inputNickname" maxlength="8" placeholder="최대 8글자">
-            <button id="btnSubmitScore">등록하기</button>
+            <h1 class="text-3xl font-bold mb-4 text-green-400">명예의 전당 등록</h1>
+            <div id="nickRankInfo" class="my-rank-info mb-6">
+                <p class="text-base text-yellow-300">현재 예상 순위</p>
+                <p id="nickPotentialRank" class="text-2xl font-bold mt-1">계산 중...</p>
+            </div>
+            <p class="text-base mb-4 text-gray-400">랭킹에 남길 이름을 입력해주세요.</p>
+            <div class="relative w-full flex items-center justify-center">
+                <input type="text" id="inputNickname" maxlength="8" placeholder="이름을 입력하세요">
+            </div>
+            <button id="btnSubmitScore" class="mt-4">확인</button>
         </div>
 
         <!-- 랭킹 화면 -->
         <div id="panelLeaderboard" class="panel leaderboard-panel hidden">
-            <h1 class="text-2xl font-bold mb-4 text-green-400">명예의 전당</h1>
-            <div id="leaderboardList" class="mb-4 max-h-[60vh] overflow-y-auto pr-2">
-                <!-- 랭킹 데이터가 여기에 삽입됨 -->
+            <h1 id="leaderboardTitle" class="text-2xl font-bold mb-4 text-green-400">명예의 전당</h1>
+            <div id="leaderboardList" class="mb-4 max-h-[50vh] overflow-y-auto pr-2">
                 <p class="text-base">데이터 불러오는 중...</p>
             </div>
             <button id="btnCloseLeaderboard" class="btn-secondary">뒤로 가기</button>
@@ -249,12 +293,15 @@
         const ctx = canvas.getContext('2d');
 
         // UI Elements
-        const panelMenu = document.getElementById('panelMenu');
         const panelGameover = document.getElementById('panelGameover');
+        const panelResults = document.getElementById('panelResults');
         const panelNickname = document.getElementById('panelNickname');
         const panelLeaderboard = document.getElementById('panelLeaderboard');
         const leaderboardList = document.getElementById('leaderboardList');
         const inputNickname = document.getElementById('inputNickname');
+        const nickPotentialRank = document.getElementById('nickPotentialRank');
+        const resultScore = document.getElementById('resultScore');
+        const resultBest = document.getElementById('resultBest');
 
         const btnStart = document.getElementById('btnStart');
         const btnRestart = document.getElementById('btnRestart');
@@ -265,7 +312,7 @@
         const btnSubmitScore = document.getElementById('btnSubmitScore');
 
         const failMessage = document.getElementById('failMessage');
-        const finalScore = document.getElementById('finalScore');
+        const finalScore = document.getElementById('finalScore'); // This element is no longer in HTML, but kept for now.
         const topScoreInfo = document.getElementById('topScoreInfo');
 
         // 게임 내부 해상도 (폭을 늘려 점수 UI와 전체적인 화면이 잘 담기도록 수정)
@@ -276,6 +323,7 @@
         let state = 'MENU'; // MENU, READY, POURING, EVALUATING, GAMEOVER
         let score = 0;
         let bestScore = parseInt(localStorage.getItem('soju_bestScore')) || 0;
+        let isSubmitted = false; // 추가: 이번 판 점수 제출 여부
         let targetBu = 5;
         let currentFill = 0;
         let bossMessage = '';
@@ -327,8 +375,11 @@
             trackPlayCount('soju', true); // 플레이 수 증가 (시작 & 재도전 모두 카운트)
 
             score = 0;
+            isSubmitted = false;
             panelMenu.classList.add('hidden');
             panelGameover.classList.add('hidden');
+            panelResults.classList.add('hidden');
+            panelNickname.classList.add('hidden');
             resetRound();
         }
 
@@ -434,46 +485,91 @@
             }
         }
 
-        function gameOver(reason) {
+        function gameOver(message) {
             state = 'GAMEOVER';
+            failMessage.innerText = message;
 
-            // 최고 기록 갱신 여부 확인
-            const isNewBest = score > bestScore && score > 0;
+            let isNewBest = false;
             if (score > bestScore) {
                 bestScore = score;
                 localStorage.setItem('soju_bestScore', bestScore);
+                isNewBest = true;
             }
 
-            setTimeout(() => {
-                failMessage.innerText = reason;
-                finalScore.innerText = `최종: ${score}잔\n최고 기록: ${bestScore}잔`;
+            panelGameover.classList.remove('hidden');
 
-                if (isNewBest) {
-                    // 신기록 달성 시 닉네임 입력창 띄우기
-                    panelNickname.classList.remove('hidden');
-                    inputNickname.value = getUserNickname();
+            // 화면 클릭 시 요약 또는 닉네임 창으로 이동하도록 이벤트 한 번만 등록
+            const proceed = async () => {
+                window.removeEventListener('mousedown', proceed);
+                window.removeEventListener('touchstart', proceed);
+                panelGameover.classList.add('hidden');
 
-                    // 조금의 지연을 주어 확실하게 포커스 (모든 브라우저 대응)
-                    setTimeout(() => {
-                        inputNickname.focus();
-                        inputNickname.select(); // 기존 텍스트가 있으면 드래그 선택 상태로
-                    }, 100);
+                const savedNickname = getUserNickname();
+                if (!savedNickname) {
+                    showNicknamePanel();
                 } else {
-                    panelGameover.classList.remove('hidden');
+                    // 복귀 유저: 자동 등록 후 결과 요약 표시
+                    if (isNewBest) await submitScore('soju', savedNickname, score);
+                    showResultsPanel();
                 }
-            }, 1500);
+            };
+
+            setTimeout(() => {
+                window.addEventListener('mousedown', proceed);
+                window.addEventListener('touchstart', proceed);
+            }, 500);
+        }
+
+        const ADJECTIVES = ['취중진담', '영업왕', '소주대장', '만취불패', '알쓰탈출', '회식요정', '폭탄제조기', '매너왕', '주당', '말술'];
+        const NAMES = ['막내', '신입', '사수', '대리', '과장', '팀장', '부장', '이사', '대표', '막내즈'];
+
+        function getRandomNickname() {
+            const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+            const name = NAMES[Math.floor(Math.random() * NAMES.length)];
+            return adj + name;
+        }
+
+        function showNicknamePanel() {
+            panelNickname.classList.remove('hidden');
+            inputNickname.value = getRandomNickname();
+            nickPotentialRank.innerText = '계산 중...';
+
+            // 예상 순위 계산
+            getLeaderboard('soju').then(data => {
+                let myRank = 1;
+                if (data.length > 0) {
+                    const betterScores = data.filter(item => item.score > score);
+                    myRank = betterScores.length + 1;
+                }
+                nickPotentialRank.innerText = `${myRank}위`;
+            });
+
+            setTimeout(() => {
+                inputNickname.focus();
+                inputNickname.select();
+            }, 100);
+        }
+
+        function showResultsPanel() {
+            resultScore.innerText = `최종: ${score}잔`;
+            resultBest.innerText = `최고 기록: ${bestScore}잔`;
+            panelResults.classList.remove('hidden');
+            updateTopScoreDisplay();
         }
 
         // 랭킹 관련 함수들
         async function loadLeaderboard() {
-            // 다른 패널들 숨기기 (페이지 전환 효과)
+            // 다른 패널들 숨기기
             panelMenu.classList.add('hidden');
             panelGameover.classList.add('hidden');
+            panelResults.classList.add('hidden');
+            panelNickname.classList.add('hidden');
 
             leaderboardList.innerHTML = '<p class="text-base">데이터 불러오는 중...</p>';
             panelLeaderboard.classList.remove('hidden');
 
             const data = await getLeaderboard('soju');
+
             if (data.length === 0) {
                 leaderboardList.innerHTML = '<p class="text-base font-bold text-gray-400 mt-10">등록된 랭킹이 없습니다.</p>';
                 return;
@@ -504,9 +600,10 @@
             btnSubmitScore.innerText = '등록하기';
 
             if (success) {
+                isSubmitted = true;
                 panelNickname.classList.add('hidden');
-                loadLeaderboard();
-                updateTopScoreDisplay(); // 1등 정보 갱신
+                showResultsPanel();
+                updateTopScoreDisplay();
             } else {
                 alert('등록에 실패했습니다. 다시 시도해주세요.');
             }
@@ -529,7 +626,7 @@
         async function shareResult() {
             const shareData = {
                 title: '딸깍 아케이드 - 막내의 소주따르기',
-                text: `[막내의 소주따르기] 내가 바로 이 구역의 영업왕! 점심 회식에서 ${score}잔을 따랐습니다. 당신도 도전해보시겠습니까?`,
+                text: `[막내의 눈물나는 소주따르기] 하... 땀 뻘뻘 흘리며 ${score}잔 따르고 겨우 살아남았습니다; 당신의 사회생활 생존력은 어느 정도인가요? 🥺`,
                 url: window.location.href
             };
 
@@ -605,13 +702,19 @@
         btnCloseLeaderboard.addEventListener('click', () => {
             panelLeaderboard.classList.add('hidden');
             if (state === 'GAMEOVER') {
-                panelGameover.classList.remove('hidden');
+                showResultsPanel();
             } else {
                 panelMenu.classList.remove('hidden');
             }
         });
         btnSubmitScore.addEventListener('click', handleScoreSubmission);
         btnShare.addEventListener('click', shareResult);
+        document.getElementById('btnResetData').addEventListener('click', () => {
+            if (confirm('로컬 데이터를 초기화하고 페이지를 새로고침하시겠습니까? (테스트용)')) {
+                localStorage.clear();
+                location.reload();
+            }
+        });
         inputNickname.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleScoreSubmission();
         });
