@@ -72,7 +72,7 @@
             /* 세로 높이 추가 상향 */
             width: 100%;
             font-family: 'NeoDunggeunmo', sans-serif;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             /* 글자 크기 추가 상향 */
             line-height: 1;
             cursor: pointer;
@@ -193,7 +193,7 @@
             margin-bottom: 24px !important;
             /* 60px -> 24px 여백 최적화 */
             font-family: 'NeoDunggeunmo', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             display: block;
         }
 
@@ -221,13 +221,13 @@
     <div id="ui" class="ui-layer">
         <!-- 시작 화면 -->
         <div id="panelMenu" class="panel">
-            <h1 class="text-3xl font-bold mb-4 text-green-400">막내의 눈물나는<br>소주따르기</h1>
-            <p class="text-base mb-4 leading-relaxed">
+            <h1 class="text-4xl font-bold mb-4 text-green-400">막내의 눈물나는<br>소주따르기</h1>
+            <p class="text-lg mb-4 leading-relaxed">
                 대망의 입사 후 첫 회식날.<br>
                 면접 때 소주 기가 막히게 따른다고<br>
                 어필해서 합격했는데... 증명해내자!
             </p>
-            <div class="text-left text-base text-gray-300 mb-4 bg-gray-800 p-3 rounded border border-gray-600">
+            <div class="text-left text-lg text-gray-300 mb-4 bg-gray-800 p-3 rounded border border-gray-600">
                 [게임 규칙]<br>
                 상사가 지시하는 'n부' 높이에 맞춰 소주를 따르세요.<br>
                 (예: 7부 = 잔의 70% 높이)
@@ -235,23 +235,23 @@
             <div class="flex flex-col gap-4 mt-4">
                 <button id="btnStart">회식 시작</button>
                 <button id="btnShowLeaderboard" class="btn-secondary">전체 랭킹</button>
-                <p id="topScoreInfo" class="text-base text-yellow-300 font-bold min-h-[24px]"></p>
+                <p id="topScoreInfo" class="text-lg text-yellow-300 font-bold min-h-[24px]"></p>
             </div>
         </div>
 
         <!-- 게임 종료 통보 (짧은 연출용) -->
         <div id="panelGameover" class="panel hidden">
-            <h1 class="text-3xl font-bold mb-4 text-red-400">FAIL</h1>
-            <p id="failMessage" class="text-lg mb-4"></p>
-            <div class="mt-4 text-gray-400 text-sm animate-pulse">화면을 터치하여 계속...</div>
+            <h1 class="text-4xl font-bold mb-4 text-red-400">FAIL</h1>
+            <p id="failMessage" class="text-xl mb-4"></p>
+            <div class="mt-4 text-gray-400 text-base animate-pulse">화면을 터치하여 계속...</div>
         </div>
 
         <!-- 결과 요약 페이지 (새로 추가) -->
         <div id="panelResults" class="panel hidden">
-            <h1 class="text-3xl font-bold mb-6 text-yellow-400">회식 결과</h1>
+            <h1 class="text-4xl font-bold mb-6 text-yellow-400">회식 결과</h1>
             <div class="bg-gray-800/50 p-6 rounded-lg border border-gray-700 mb-6">
-                <p id="resultScore" class="text-2xl text-white mb-2"></p>
-                <p id="resultBest" class="text-lg text-gray-400"></p>
+                <p id="resultScore" class="text-3xl text-white mb-2"></p>
+                <p id="resultBest" class="text-xl text-gray-400"></p>
             </div>
             <div class="flex flex-col gap-4">
                 <button id="btnRestart">다시 도전</button>
@@ -262,12 +262,12 @@
 
         <!-- 전용 닉네임 입력 화면 -->
         <div id="panelNickname" class="panel hidden">
-            <h1 class="text-3xl font-bold mb-4 text-green-400">명예의 전당 등록</h1>
+            <h1 class="text-4xl font-bold mb-4 text-green-400">명예의 전당 등록</h1>
             <div id="nickRankInfo" class="my-rank-info mb-6">
-                <p class="text-base text-yellow-300">현재 예상 순위</p>
-                <p id="nickPotentialRank" class="text-2xl font-bold mt-1">계산 중...</p>
+                <p class="text-lg text-yellow-300">현재 예상 순위</p>
+                <p id="nickPotentialRank" class="text-3xl font-bold mt-1">계산 중...</p>
             </div>
-            <p class="text-base mb-4 text-gray-400">랭킹에 남길 이름을 입력해주세요.</p>
+            <p class="text-lg mb-4 text-gray-400">랭킹에 남길 이름을 입력해주세요.</p>
             <div class="relative w-full flex items-center justify-center">
                 <input type="text" id="inputNickname" maxlength="8" placeholder="이름을 입력하세요">
             </div>
@@ -276,9 +276,9 @@
 
         <!-- 랭킹 화면 -->
         <div id="panelLeaderboard" class="panel leaderboard-panel hidden">
-            <h1 id="leaderboardTitle" class="text-2xl font-bold mb-4 text-green-400">명예의 전당</h1>
+            <h1 id="leaderboardTitle" class="text-3xl font-bold mb-4 text-green-400">명예의 전당</h1>
             <div id="leaderboardList" class="mb-4 max-h-[50vh] overflow-y-auto pr-2">
-                <p class="text-base">데이터 불러오는 중...</p>
+                <p class="text-lg">데이터 불러오는 중...</p>
             </div>
             <button id="btnCloseLeaderboard" class="btn-secondary">뒤로 가기</button>
         </div>
@@ -841,7 +841,7 @@
             // 하단 조작 안내 문구 추가
             if (state === 'READY' || state === 'POURING') {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.font = '10px "NeoDunggeunmo"'; // 12 -> 10
+                ctx.font = '14px "NeoDunggeunmo"'; // 10 -> 14
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText("클릭한 채 좌우로 움직여 따르세요", GAME_WIDTH / 2, GAME_HEIGHT - 15);
@@ -864,13 +864,13 @@
 
                 // "TAP!" 텍스트 가이드
                 ctx.fillStyle = '#FFFF00';
-                ctx.font = 'bold 12px "NeoDunggeunmo"';
+                ctx.font = 'bold 16px "NeoDunggeunmo"'; // 12 -> 16
                 ctx.fillText("TAP!", gx, gy - radius - 10);
             }
 
             // 우측 상단 점수 UI (캔버스 내부에 직접 그려서 화면 밖으로 잘림 방지)
             if (state !== 'MENU' && panelGameover.classList.contains('hidden')) {
-                ctx.font = '14px "NeoDunggeunmo"'; // 16 -> 14
+                ctx.font = '18px "NeoDunggeunmo"'; // 14 -> 18
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'top';
 
@@ -918,7 +918,7 @@
 
             // 말풍선 (머리와 함께 아래로 30px 이동)
             if (state !== 'MENU' && bossMessage !== '') {
-                ctx.font = '12px "NeoDunggeunmo"';
+                ctx.font = '16px "NeoDunggeunmo"'; // 12 -> 16
                 let textWidth = ctx.measureText(bossMessage).width;
                 let bubbleW = textWidth + 16;
                 let bubbleH = 26;
