@@ -780,7 +780,7 @@
         }
 
         function startGame() {
-            trackPlayCount('budget_run', true);
+            trackPlayCount('budget-run', true);
             isSubmitted = false;
             introScreen.style.display = 'none';
             panelNickname.style.display = 'none';
@@ -806,7 +806,7 @@
                 showNicknamePanel();
             } else {
                 // 2. 유저가 닉네임을 등록한 경우 바로 제출 후 결과 페이지 랜딩 (서버에서 최고기록 비교 후 갱신)
-                await submitScore('budget_run', savedNickname, budget);
+                await submitScore('budget-run', savedNickname, budget);
                 showResultPanel();
             }
         }
@@ -816,7 +816,7 @@
             inputNickname.value = '';
             nickPotentialRank.innerText = '계산 중...';
 
-            getLeaderboard('budget_run', 100).then(data => {
+            getLeaderboard('budget-run', 100).then(data => {
                 let myRank = 1;
                 if (data.length > 0) {
                     const betterScores = data.filter(item => item.score > Math.max(budget, bestScore));
@@ -838,7 +838,7 @@
             panelResults.style.display = 'flex';
             introScreen.style.display = 'none';
 
-            getLeaderboard('budget_run', 100).then(data => {
+            getLeaderboard('budget-run', 100).then(data => {
                 let myRank = 1;
                 if (data.length > 0) {
                     const betterScores = data.filter(item => item.score > Math.max(budget, bestScore));
@@ -857,7 +857,7 @@
 
         async function loadLeaderboard() {
             leaderboardList.innerHTML = '<p style="color:#aaa;">데이터 불러오는 중...</p>';
-            const data = await getLeaderboard('budget_run');
+            const data = await getLeaderboard('budget-run');
 
             if (data.length === 0) {
                 leaderboardList.innerHTML = '<p style="color:#aaa;">등록된 랭킹이 없습니다.</p>';
@@ -885,7 +885,7 @@
             btnSubmitScore.disabled = true;
             btnSubmitScore.innerText = '등록 중...';
 
-            const success = await submitScore('budget_run', nickname, budget);
+            const success = await submitScore('budget-run', nickname, budget);
 
             btnSubmitScore.disabled = false;
             btnSubmitScore.innerText = '등록하기';
@@ -901,7 +901,7 @@
 
         async function updateTopScoreDisplay() {
             try {
-                const data = await getLeaderboard('budget_run', 1);
+                const data = await getLeaderboard('budget-run', 1);
                 if (data && data.length > 0) {
                     topScoreInfo.innerText = `현재 1등: ${data[0].nickname} (₩ ${data[0].score.toLocaleString()})`;
                 } else {
@@ -974,7 +974,7 @@
         // Initialize top score display on intro screen
         async function fetchIntroTopScore() {
             try {
-                const data = await getLeaderboard('budget_run', 1);
+                const data = await getLeaderboard('budget-run', 1);
                 const introTopScore = document.getElementById('introTopScore');
                 if (data && data.length > 0) {
                     introTopScore.innerText = `현재 1위: ${data[0].nickname} (₩ ${data[0].score.toLocaleString()})`;
