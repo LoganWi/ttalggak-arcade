@@ -1,4 +1,4 @@
-import { db, doc, setDoc, collection, query, orderBy, limit, getDocs, serverTimestamp } from "./firebase-config.js";
+import { db, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs, serverTimestamp } from "./firebase-config.js";
 
 // 로컬 스토리지 키 관리
 const STORAGE_PREFIX = 'ttalggak_';
@@ -34,6 +34,16 @@ export async function submitScore(gameId, nickname, score) {
         // 이는 동일 기기(userId)에서 제출하면 문서를 덮어쓰게 하여 중복 방지 역할을 함
         const scoreRef = doc(db, `leaderboards_${gameId}`, userId);
 
+        // 기존 문서 확인하여 더 높은 점수일 때만 갱신
+        const docSnap = await getDoc(scoreRef);
+        if (docSnap.exists()) {
+            const existingScore = docSnap.data().score || 0;
+            if (score <= existingScore) {
+                console.log("기존 최고 기록에 미치지 못하여 점수를 갱신하지 않습니다.");
+                return true; // 성공으로 간주하여 다음 화면으로 넘김
+            }
+        }
+
         await setDoc(scoreRef, {
             nickname: nickname,
             score: score,
@@ -62,15 +72,21 @@ export async function getLeaderboard(gameId, limitNum = 20) {
 
         const querySnapshot = await getDocs(q);
         const leaderboard = [];
+        const seenNicknames = new Set();
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            leaderboard.push({
-                id: doc.id,
-                ...data,
-                // serverTimestamp가 클라이언트에서 아직 null일 수 있으므로 대체값 설정
-                localTime: data.timestamp ? data.timestamp.toMillis() : Date.now()
-            });
+            const nickname = data.nickname ? data.nickname.trim() : '';
+
+            if (nickname && !seenNicknames.has(nickname)) {
+                seenNicknames.add(nickname);
+                leaderboard.push({
+                    id: doc.id,
+                    ...data,
+                    // serverTimestamp가 클라이언트에서 아직 null일 수 있으므로 대체값 설정
+                    localTime: data.timestamp ? data.timestamp.toMillis() : Date.now()
+                });
+            }
         });
 
         // 2차 정렬: 점수가 같을 경우 타임스탬프 오름차순(먼저 달성한 사람이 위로) 정렬

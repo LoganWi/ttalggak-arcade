@@ -3,6 +3,16 @@ import { getPlayCount } from "./api-playcount.js";
 // 게임 데이터 구성 (카테고리 2개씩 지정)
 const gamesData = [
     {
+        id: "budget-run",
+        title: "BUDGET RUN!",
+        desc: "팀장님!! 저희 회식은요...? 화면 터치 혹은 스페이스바 눌러서 예산 따오기",
+        href: "/games/budget-run/",
+        thumbClass: "thumb-budget-run",
+        thumbUrl: "/assets/images/thumb-budget-run.png",
+        tags: ["캐주얼", "액션"],
+        color: "#ffd700"
+    },
+    {
         id: "soju",
         title: "막내의 눈물나는 소주따르기",
         desc: "면접 때 '소주 하난 기가 막히게 따릅니다'라고 질렀는데... 대망의 첫 회식, 입사 취소 안 되려면 손목 스냅 잘 활용해라.",
@@ -81,6 +91,13 @@ function renderGames() {
         img.onload = () => {
             // 이미지가 로드되면 is-loading 클래스 제거
             a.classList.remove("is-loading");
+        };
+        img.onerror = () => {
+            // 이미지가 없어도 카드가 표시되도록 is-loading 제거
+            a.classList.remove("is-loading");
+            // 임시로 배경색상을 지정
+            const thumb = a.querySelector('.card-thumbnail');
+            if (thumb) thumb.style.background = '#333';
         };
 
         // 초기 플레이 카운트 페치
