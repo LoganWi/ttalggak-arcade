@@ -94,6 +94,8 @@ export default function Home() {
 
   return (
     <div className="arcade-container">
+      <div className="lobby-overlay-stars" />
+      <div className="lobby-overlay-grid" />
       <header>
         <div className="logo-wrap">
           <span className="logo-subtitle">※주의※ 회사에서 당당하게 하지 마시오.</span>
