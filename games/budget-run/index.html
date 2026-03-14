@@ -941,7 +941,10 @@
         }
 
         function handleInput(e) {
-            if (e && e.target.tagName !== 'BUTTON') e.preventDefault();
+            // 버튼이나 링크(아이콘 포함)를 클릭한 경우에는 게임 입력을 처리하지 않고 return
+            if (e && (e.target.closest('button') || e.target.closest('a'))) return;
+
+            if (e && e.cancelable) e.preventDefault();
             if (gameState !== 'PLAYING') return;
 
             addTrailPoint();

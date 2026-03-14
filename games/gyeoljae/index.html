@@ -861,9 +861,21 @@
         canvas.addEventListener('mousedown', handleStart);
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(e); }, { passive: false });
-        window.addEventListener('touchmove', (e) => { if (e.target !== resetBtn && e.target !== homeBtn) e.preventDefault(); handleMove(e); }, { passive: false });
-        window.addEventListener('touchend', (e) => { if (e.target !== resetBtn && e.target !== homeBtn) e.preventDefault(); handleEnd(e); }, { passive: false });
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#resetBtn') || e.target.closest('#home-btn')) return;
+            e.preventDefault();
+            handleStart(e);
+        }, { passive: false });
+        window.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#resetBtn') || e.target.closest('#home-btn')) return;
+            e.preventDefault();
+            handleMove(e);
+        }, { passive: false });
+        window.addEventListener('touchend', (e) => {
+            if (e.target.closest('#resetBtn') || e.target.closest('#home-btn')) return;
+            e.preventDefault();
+            handleEnd(e);
+        }, { passive: false });
         resetBtn.addEventListener('click', initGame);
         resetBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); initGame(); }, { passive: false });
 
