@@ -362,6 +362,15 @@ export default function Home() {
           opacity: 1;
         }
 
+        .card-thumbnail {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 80px;
+        }
+
         .game-card.active:hover .card-thumbnail-img {
           transform: scale(1.06);
         }
