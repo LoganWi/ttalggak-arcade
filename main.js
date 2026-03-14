@@ -5,7 +5,7 @@ const gamesData = [
     {
         id: "budget-run",
         title: "BUDGET RUN!",
-        desc: "팀장님!! 저희 회식은요...? 화면 터치 혹은 스페이스바 눌러서 예산 따오기",
+        desc: "팀장님 화이팅..! 저희 이번 회식은 치킨 말고 한우, 회, 오마카세... 이런 거 먹고 싶어요! 쏟아지는 업무 폭탄을 피해 역대급 예산을 쟁취하세요.",
         href: "/games/budget-run/",
         thumbClass: "thumb-budget-run",
         thumbUrl: "/assets/images/thumb-budget-run.png",
