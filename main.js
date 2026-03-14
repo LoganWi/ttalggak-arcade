@@ -5,7 +5,7 @@ const gamesData = [
     {
         id: "budget-run",
         title: "BUDGET RUN!",
-        desc: "팀장님, 이번 회식은 제발 치킨 말고 한우, 회, 오마카세... 이런 거 먹고 싶어요! 팀원들의 품격 있는 저녁을 위해, 법카 한도 돌파하러 달려라!!",
+        desc: "팀장님, 이번 회식은 제발 치킨 말고 한우, 회, 오마카세... 이런 거 먹고 싶어요! 팀원들의 품격 있는 회식을 위해, 예산 따내러 달려라!",
         href: "/games/budget-run/",
         thumbClass: "thumb-budget-run",
         thumbUrl: "/assets/images/thumb-budget-run.png",
