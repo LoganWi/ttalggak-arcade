@@ -59,6 +59,11 @@ const gamesData = [
 
 export default function Home() {
   const [playCounts, setPlayCounts] = useState({});
+  const [loadedImages, setLoadedImages] = useState({});
+
+  const handleImageLoad = (id) => {
+    setLoadedImages((prev) => ({ ...prev, [id]: true }));
+  };
 
   useEffect(() => {
     async function fetchCounts() {
@@ -95,12 +100,13 @@ export default function Home() {
         <div className="games-grid">
           {gamesData.map((game) => (
             <Link key={game.id} href={game.href} className="game-card active">
-              <div className="play-badge">PLAY</div>
-              <div className="card-thumbnail-wrap">
-                <div
-                  className={`card-thumbnail ${game.thumbClass}`}
-                  style={{ backgroundImage: `url(${game.thumbUrl})` }}
-                ></div>
+              <div className={`card-thumbnail-wrap ${!loadedImages[game.id] ? "skeleton-bg" : ""}`}>
+                <img
+                  src={game.thumbUrl}
+                  alt={game.title}
+                  className={`card-thumbnail-img ${loadedImages[game.id] ? "loaded" : ""}`}
+                  onLoad={() => handleImageLoad(game.id)}
+                />
               </div>
               <div className="card-body">
                 <div className="tags-wrap">
@@ -344,23 +350,53 @@ export default function Home() {
           background: rgba(255, 255, 255, 0.05);
         }
 
-        .card-thumbnail {
+        .card-thumbnail-img {
           width: 100%;
           height: 100%;
-          background-size: cover;
-          background-position: center;
-          transition: transform 0.4s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 80px;
+          object-fit: cover;
+          transition: transform 0.4s ease, opacity 0.3s ease;
+          opacity: 0;
         }
 
-        .game-card.active:hover .card-thumbnail {
+        .card-thumbnail-img.loaded {
+          opacity: 1;
+        }
+
+        .game-card.active:hover .card-thumbnail-img {
           transform: scale(1.06);
         }
 
-        .coming-badge, .play-badge {
+        .skeleton-bg {
+          background: rgba(255, 255, 255, 0.05);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .skeleton-bg::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          transform: translateX(-100%);
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(255, 255, 255, 0.03) 20%,
+            rgba(255, 255, 255, 0.08) 60%,
+            rgba(255, 255, 255, 0)
+          );
+          animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        .coming-badge {
           position: absolute;
           top: 14px;
           right: 14px;
@@ -372,17 +408,6 @@ export default function Home() {
           padding: 5px 10px;
           border-radius: 4px;
           z-index: 20;
-        }
-
-        .play-badge {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .play-badge::before {
-          content: '▶';
-          font-size: 7px;
         }
 
         .card-body {
