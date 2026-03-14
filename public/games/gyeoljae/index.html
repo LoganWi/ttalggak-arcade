@@ -252,105 +252,108 @@
         }
         window.addEventListener('resize', resize);
 
+        // Sprite Caching for static assets
+        const SpriteCache = {
+            canvases: {},
+            get(id, drawFunc, w, h) {
+                if (!this.canvases[id]) {
+                    const c = document.createElement('canvas');
+                    c.width = w; c.height = h;
+                    const cctx = c.getContext('2d');
+                    cctx.imageSmoothingEnabled = false;
+                    drawFunc(cctx);
+                    this.canvases[id] = c;
+                }
+                return this.canvases[id];
+            },
+            clear() { this.canvases = {}; }
+        };
+
         class BackWall {
-            constructor() { this.z = 7500; }
+            constructor() {
+                this.z = 7500;
+                this.cachedCanvas = SpriteCache.get('BackWall', (ctx) => {
+                    ctx.fillStyle = '#7a96b4';
+                    ctx.fillRect(0, 0, 6000, 620);
+                    ctx.fillStyle = '#4c647c';
+                    ctx.fillRect(1800, 100, 2400, 450);
+                    ctx.fillStyle = '#a0e4fa';
+                    ctx.fillRect(1840, 130, 2320, 390);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(1840, 130, 2320, 390);
+                    ctx.clip();
+                    ctx.fillStyle = '#78c6e3';
+                    const bld = [[2000, 400, 200, 300], [2250, 350, 150, 400], [2450, 450, 300, 300], [2900, 300, 250, 400], [3200, 420, 200, 300], [3500, 320, 300, 400], [3850, 380, 250, 300]];
+                    bld.forEach(b => ctx.fillRect(b[0], b[1], b[2], b[3]));
+                    ctx.fillStyle = '#55a1be';
+                    const bld2 = [[1900, 520, 250, 300], [2200, 500, 150, 400], [2400, 550, 300, 300], [2800, 480, 250, 400], [3150, 580, 200, 300], [3450, 450, 350, 400], [3900, 540, 200, 300]];
+                    bld2.forEach(b => ctx.fillRect(b[0], b[1], b[2], b[3]));
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillRect(2200, 250, 200, 30); ctx.fillRect(2300, 220, 100, 30);
+                    ctx.fillRect(3300, 200, 250, 40); ctx.fillRect(3350, 160, 150, 40);
+                    ctx.restore();
+                    ctx.fillStyle = '#394d63';
+                    ctx.fillRect(2980, 100, 40, 450);
+                    ctx.fillRect(1800, 400, 2400, 20);
+                }, 6000, 620);
+            }
             draw() {
                 let p = project(0, 0, this.z);
                 if (p.scale <= 0) return;
                 ctx.save();
                 ctx.translate(p.sx, p.sy);
                 ctx.scale(p.scale, p.scale);
-                ctx.fillStyle = '#7a96b4';
-                ctx.fillRect(-3000, -500, 6000, 620);
-                ctx.fillStyle = '#4c647c';
-                ctx.fillRect(-1200, -400, 2400, 450);
-                ctx.fillStyle = '#a0e4fa';
-                ctx.fillRect(-1160, -370, 2320, 390);
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(-1160, -370, 2320, 390);
-                ctx.clip();
-                ctx.fillStyle = '#78c6e3';
-                ctx.fillRect(-1000, -100, 200, 300);
-                ctx.fillRect(-750, -150, 150, 400);
-                ctx.fillRect(-550, -50, 300, 300);
-                ctx.fillRect(-100, -200, 250, 400);
-                ctx.fillRect(200, -80, 200, 300);
-                ctx.fillRect(500, -180, 300, 400);
-                ctx.fillRect(850, -120, 250, 300);
-                ctx.fillStyle = '#55a1be';
-                ctx.fillRect(-1100, 20, 250, 300);
-                ctx.fillRect(-800, 0, 150, 400);
-                ctx.fillRect(-600, 50, 300, 300);
-                ctx.fillRect(-200, -20, 250, 400);
-                ctx.fillRect(150, 80, 200, 300);
-                ctx.fillRect(450, -50, 350, 400);
-                ctx.fillRect(900, 40, 200, 300);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.fillRect(-800, -250, 200, 30);
-                ctx.fillRect(-700, -280, 100, 30);
-                ctx.fillRect(300, -300, 250, 40);
-                ctx.fillRect(350, -340, 150, 40);
-                ctx.restore();
-                ctx.fillStyle = '#394d63';
-                ctx.fillRect(-20, -400, 40, 450);
-                ctx.fillRect(-1200, -100, 2400, 20);
+                ctx.drawImage(this.cachedCanvas, -3000, -500);
                 ctx.restore();
             }
         }
 
         class DisplayCabinet {
             constructor(x, z) {
-                this.x = x;
-                this.y = FLOOR_Y;
-                this.z = z;
+                this.x = x; this.y = FLOOR_Y; this.z = z;
+                this.cachedCanvas = SpriteCache.get('Cabinet', (ctx) => {
+                    ctx.lineWidth = 6; ctx.strokeStyle = '#000';
+                    ctx.fillStyle = '#450a0a'; ctx.fillRect(0, -500, 800, 500); ctx.strokeRect(0, -500, 800, 500);
+                    ctx.fillStyle = '#2e0707';
+                    ctx.fillRect(20, -350, 760, 20); ctx.strokeRect(20, -350, 760, 20);
+                    ctx.fillRect(20, -200, 760, 20); ctx.strokeRect(20, -200, 760, 20);
+                    ctx.fillStyle = '#b45309'; ctx.fillRect(100, -480, 100, 130); ctx.strokeRect(100, -480, 100, 130);
+                    ctx.fillStyle = '#fef3c7'; ctx.fillRect(120, -460, 60, 90);
+                    ctx.fillStyle = '#fbbf24'; ctx.fillRect(140, -400, 20, 20);
+                    ctx.fillStyle = '#b45309'; ctx.fillRect(250, -460, 140, 110); ctx.strokeRect(250, -460, 140, 110);
+                    ctx.fillStyle = '#fef3c7'; ctx.fillRect(270, -440, 100, 70);
+                    ctx.fillStyle = '#ef4444'; ctx.fillRect(330, -400, 20, 20);
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.beginPath(); ctx.moveTo(550, -370); ctx.lineTo(500, -460); ctx.lineTo(600, -460); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(550, -460, 50, 0, Math.PI, false); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#78350f'; ctx.fillRect(510, -370, 80, 20); ctx.strokeRect(510, -370, 80, 20);
+                    ctx.fillStyle = 'rgba(253, 230, 138, 0.6)';
+                    ctx.fillRect(150, -330, 120, 130); ctx.strokeRect(150, -330, 120, 130);
+                    ctx.fillStyle = '#ef4444'; ctx.fillRect(180, -350, 60, 20); ctx.strokeRect(180, -350, 60, 20);
+                    ctx.fillStyle = '#d97706'; ctx.beginPath(); ctx.moveTo(210, -210); ctx.lineTo(180, -260); ctx.lineTo(220, -310); ctx.lineTo(240, -250); ctx.fill();
+                    ctx.fillStyle = '#0f172a'; ctx.fillRect(400, -320, 70, 120); ctx.strokeRect(400, -320, 70, 120);
+                    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.moveTo(400, -240); ctx.lineTo(470, -260); ctx.lineTo(470, -220); ctx.lineTo(400, -200); ctx.fill();
+                    ctx.fillStyle = '#d97706'; ctx.fillRect(425, -340, 20, 20);
+                    ctx.fillStyle = '#854d0e'; ctx.beginPath(); ctx.arc(600, -250, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.fillRect(585, -330, 30, 40); ctx.strokeRect(585, -330, 30, 40);
+                    ctx.fillStyle = '#fef08a'; ctx.fillRect(580, -270, 40, 20);
+                    ctx.fillStyle = '#000'; ctx.font = "bold 16px 'NeoDunggeunmo'"; ctx.fillText("X.O", 583, -255);
+                    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(100, -150, 40, 150); ctx.strokeRect(100, -150, 40, 150);
+                    ctx.fillStyle = '#b91c1c'; ctx.fillRect(150, -170, 50, 170); ctx.strokeRect(150, -170, 50, 170);
+                    ctx.fillStyle = '#fbbf24'; ctx.fillRect(160, -150, 30, 10);
+                    ctx.fillStyle = '#166534'; ctx.fillRect(210, -120, 40, 120); ctx.strokeRect(210, -120, 40, 120);
+                    ctx.fillStyle = '#94a3b8'; ctx.fillRect(450, -150, 250, 150); ctx.strokeRect(450, -150, 250, 150);
+                    ctx.fillStyle = '#475569'; ctx.fillRect(470, -130, 210, 110); ctx.strokeRect(470, -130, 210, 110);
+                    ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(520, -75, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.fillRect(600, -85, 40, 20); ctx.strokeRect(600, -85, 40, 20);
+                }, 800, 500);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
                 if (p.scale < 0) return;
-                ctx.save();
-                ctx.translate(p.sx, p.sy);
-                ctx.scale(p.scale, p.scale);
-                ctx.lineWidth = 6;
-                ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#450a0a';
-                ctx.fillRect(0, -500, 800, 500);
-                ctx.strokeRect(0, -500, 800, 500);
-                ctx.fillStyle = '#2e0707';
-                ctx.fillRect(20, -350, 760, 20); ctx.strokeRect(20, -350, 760, 20);
-                ctx.fillRect(20, -200, 760, 20); ctx.strokeRect(20, -200, 760, 20);
-                ctx.fillStyle = '#b45309'; ctx.fillRect(100, -480, 100, 130); ctx.strokeRect(100, -480, 100, 130);
-                ctx.fillStyle = '#fef3c7'; ctx.fillRect(120, -460, 60, 90);
-                ctx.fillStyle = '#fbbf24'; ctx.fillRect(140, -400, 20, 20);
-                ctx.fillStyle = '#b45309'; ctx.fillRect(250, -460, 140, 110); ctx.strokeRect(250, -460, 140, 110);
-                ctx.fillStyle = '#fef3c7'; ctx.fillRect(270, -440, 100, 70);
-                ctx.fillStyle = '#ef4444'; ctx.fillRect(330, -400, 20, 20);
-                ctx.fillStyle = '#f59e0b';
-                ctx.beginPath(); ctx.moveTo(550, -370); ctx.lineTo(500, -460); ctx.lineTo(600, -460); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(550, -460, 50, 0, Math.PI, false); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#78350f'; ctx.fillRect(510, -370, 80, 20); ctx.strokeRect(510, -370, 80, 20);
-                ctx.fillStyle = 'rgba(253, 230, 138, 0.6)';
-                ctx.fillRect(150, -330, 120, 130); ctx.strokeRect(150, -330, 120, 130);
-                ctx.fillStyle = '#ef4444'; ctx.fillRect(180, -350, 60, 20); ctx.strokeRect(180, -350, 60, 20);
-                ctx.fillStyle = '#d97706';
-                ctx.beginPath(); ctx.moveTo(210, -210); ctx.lineTo(180, -260); ctx.lineTo(220, -310); ctx.lineTo(240, -250); ctx.fill();
-                ctx.fillStyle = '#0f172a'; ctx.fillRect(400, -320, 70, 120); ctx.strokeRect(400, -320, 70, 120);
-                ctx.fillStyle = '#38bdf8';
-                ctx.beginPath(); ctx.moveTo(400, -240); ctx.lineTo(470, -260); ctx.lineTo(470, -220); ctx.lineTo(400, -200); ctx.fill();
-                ctx.fillStyle = '#d97706'; ctx.fillRect(425, -340, 20, 20);
-                ctx.fillStyle = '#854d0e';
-                ctx.beginPath(); ctx.arc(600, -250, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.fillRect(585, -330, 30, 40); ctx.strokeRect(585, -330, 30, 40);
-                ctx.fillStyle = '#fef08a'; ctx.fillRect(580, -270, 40, 20);
-                ctx.fillStyle = '#000'; ctx.font = "bold 16px 'NeoDunggeunmo'"; ctx.fillText("X.O", 583, -255);
-                ctx.fillStyle = '#1e3a8a'; ctx.fillRect(100, -150, 40, 150); ctx.strokeRect(100, -150, 40, 150);
-                ctx.fillStyle = '#b91c1c'; ctx.fillRect(150, -170, 50, 170); ctx.strokeRect(150, -170, 50, 170);
-                ctx.fillStyle = '#fbbf24'; ctx.fillRect(160, -150, 30, 10);
-                ctx.fillStyle = '#166534'; ctx.fillRect(210, -120, 40, 120); ctx.strokeRect(210, -120, 40, 120);
-                ctx.fillStyle = '#94a3b8'; ctx.fillRect(450, -150, 250, 150); ctx.strokeRect(450, -150, 250, 150);
-                ctx.fillStyle = '#475569'; ctx.fillRect(470, -130, 210, 110); ctx.strokeRect(470, -130, 210, 110);
-                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(520, -75, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.fillRect(600, -85, 40, 20); ctx.strokeRect(600, -85, 40, 20);
+                ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
+                ctx.drawImage(this.cachedCanvas, 0, -500);
                 ctx.restore();
             }
         }
@@ -358,17 +361,20 @@
         class Plant {
             constructor() {
                 this.x = -450; this.y = FLOOR_Y; this.z = 5550;
+                this.cachedCanvas = SpriteCache.get('Plant', (ctx) => {
+                    ctx.lineWidth = 6; ctx.strokeStyle = '#000';
+                    ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.moveTo(-40, 100); ctx.lineTo(40, 100); ctx.lineTo(50, 0); ctx.lineTo(-50, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(0, -50, 60, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(-50, -80, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(50, -70, 55, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(0, -120, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                }, 200, 300);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
-                ctx.lineWidth = 6; ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.moveTo(-40, 0); ctx.lineTo(40, 0); ctx.lineTo(50, -100); ctx.lineTo(-50, -100); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(0, -150, 60, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(-50, -180, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(50, -170, 55, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, -220, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                ctx.drawImage(this.cachedCanvas, -100, -200);
                 ctx.restore();
             }
         }
@@ -376,18 +382,21 @@
         class GolfBag {
             constructor() {
                 this.x = 650; this.y = FLOOR_Y; this.z = 6900;
+                this.cachedCanvas = SpriteCache.get('GolfBag', (ctx) => {
+                    ctx.lineWidth = 6; ctx.strokeStyle = '#000';
+                    ctx.fillStyle = '#b91c1c'; ctx.beginPath(); ctx.moveTo(-35, 300); ctx.lineTo(35, 300); ctx.lineTo(45, 100); ctx.lineTo(-25, 100); ctx.closePath(); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#111'; ctx.fillRect(-25, 120, 70, 25); ctx.fillRect(-15, 220, 40, 50);
+                    ctx.fillStyle = '#ccc'; ctx.fillRect(-15, 40, 6, 60); ctx.strokeRect(-15, 40, 6, 60);
+                    ctx.fillStyle = '#333'; ctx.fillRect(-20, 30, 16, 12); ctx.fillStyle = '#ccc'; ctx.fillRect(10, 50, 6, 50); ctx.strokeRect(10, 50, 6, 50);
+                    ctx.fillStyle = '#333'; ctx.fillRect(5, 40, 16, 12); ctx.fillStyle = '#ccc'; ctx.fillRect(25, 70, 6, 30); ctx.strokeRect(25, 70, 6, 30);
+                    ctx.fillStyle = '#333'; ctx.fillRect(20, 60, 16, 12);
+                }, 150, 350);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
-                ctx.lineWidth = 6; ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#b91c1c'; ctx.beginPath(); ctx.moveTo(-35, 0); ctx.lineTo(35, 0); ctx.lineTo(45, -200); ctx.lineTo(-25, -200); ctx.closePath(); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#111'; ctx.fillRect(-25, -180, 70, 25); ctx.fillRect(-15, -80, 40, 50);
-                ctx.fillStyle = '#ccc'; ctx.fillRect(-15, -260, 6, 60); ctx.strokeRect(-15, -260, 6, 60);
-                ctx.fillStyle = '#333'; ctx.fillRect(-20, -270, 16, 12); ctx.fillStyle = '#ccc'; ctx.fillRect(10, -250, 6, 50); ctx.strokeRect(10, -250, 6, 50);
-                ctx.fillStyle = '#333'; ctx.fillRect(5, -260, 16, 12); ctx.fillStyle = '#ccc'; ctx.fillRect(25, -230, 6, 30); ctx.strokeRect(25, -230, 6, 30);
-                ctx.fillStyle = '#333'; ctx.fillRect(20, -240, 16, 12);
+                ctx.drawImage(this.cachedCanvas, -75, -300);
                 ctx.restore();
             }
         }
@@ -419,22 +428,27 @@
         }
 
         class Desk {
-            constructor() { this.z = 5400; }
+            constructor() {
+                this.z = 5400;
+                this.cachedCanvas = SpriteCache.get('Desk', (ctx) => {
+                    ctx.lineWidth = 8; ctx.strokeStyle = '#000';
+                    ctx.fillStyle = '#526078'; ctx.fillRect(-350, 0, 700, 40); ctx.strokeRect(-350, 0, 700, 40);
+                    ctx.fillStyle = '#404a5e'; ctx.fillRect(-330, 40, 660, 250); ctx.strokeRect(-330, 40, 660, 250);
+                    ctx.fillStyle = '#000'; ctx.fillRect(-150, 80, 300, 100);
+                    ctx.fillStyle = '#d19e48'; ctx.fillRect(-140, 90, 280, 80);
+                    ctx.fillStyle = '#664919'; ctx.font = `bold 65px 'NeoDunggeunmo'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('BOSS', 0, 135);
+                    ctx.fillStyle = '#8e9eab'; ctx.fillRect(-280, -40, 40, 40); ctx.strokeRect(-280, -40, 40, 40);
+                    ctx.fillStyle = '#e67e22'; ctx.fillRect(-275, -60, 10, 20); ctx.strokeRect(-275, -60, 10, 20);
+                    ctx.fillStyle = '#2ecc71'; ctx.fillRect(-255, -70, 10, 30); ctx.strokeRect(-255, -70, 10, 30);
+                    ctx.fillStyle = '#fff'; ctx.fillRect(180, -15, 90, 15); ctx.strokeRect(180, -15, 90, 15);
+                    ctx.fillRect(195, -30, 60, 15); ctx.strokeRect(195, -30, 60, 15);
+                }, 750, 350);
+            }
             draw() {
                 let p = project(0, 0, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
-                ctx.lineWidth = 8; ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#526078'; ctx.fillRect(-350, -20, 700, 40); ctx.strokeRect(-350, -20, 700, 40);
-                ctx.fillStyle = '#404a5e'; ctx.fillRect(-330, 20, 660, 250); ctx.strokeRect(-330, 20, 660, 250);
-                ctx.fillStyle = '#000'; ctx.fillRect(-150, 60, 300, 100);
-                ctx.fillStyle = '#d19e48'; ctx.fillRect(-140, 70, 280, 80);
-                ctx.fillStyle = '#664919'; ctx.font = `bold 65px 'NeoDunggeunmo'`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('BOSS', 0, 115);
-                ctx.fillStyle = '#8e9eab'; ctx.fillRect(-280, -60, 40, 40); ctx.strokeRect(-280, -60, 40, 40);
-                ctx.fillStyle = '#e67e22'; ctx.fillRect(-275, -80, 10, 20); ctx.strokeRect(-275, -80, 10, 20);
-                ctx.fillStyle = '#2ecc71'; ctx.fillRect(-255, -90, 10, 30); ctx.strokeRect(-255, -90, 10, 30);
-                ctx.fillStyle = '#fff'; ctx.fillRect(180, -35, 90, 15); ctx.strokeRect(180, -35, 90, 15);
-                ctx.fillRect(195, -50, 60, 15); ctx.strokeRect(195, -50, 60, 15);
+                ctx.drawImage(this.cachedCanvas, -375, -20);
                 ctx.restore();
             }
         }
@@ -689,6 +703,7 @@
         function initGame(fullReset = true) {
             state = 'idle'; failMessage = '';
             failOverlay.classList.remove('show');
+            hitBubble.classList.remove('show'); // Bug fix: Ensure hit bubble is hidden on reset
             if (fullReset) {
                 currentRound = 1;
                 trackPlayCount("gyeoljae", true);
@@ -697,6 +712,7 @@
                 resetBtn.innerText = 'RESTART';
             }
             wall = new BackWall(); desk = new Desk(); boss = new Boss(); plant = new Plant(); golfBag = new GolfBag();
+            boss.hit = false; boss.reactionTimer = 0; // Bug fix: Explicitly reset boss state
             sideDesks = [new SideDesk(-1200, 3900, true), new SideDesk(1200, 3900, false)];
             cabinets = [new DisplayCabinet(-1300, 7350), new DisplayCabinet(500, 7350)];
             folder = new Folder(); papers = []; particles = [];
