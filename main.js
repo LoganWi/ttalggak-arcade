@@ -8,7 +8,7 @@ const gamesData = [
         desc: "팀장님!! 저희 회식은요...? 화면 터치 혹은 스페이스바 눌러서 예산 따오기",
         href: "/games/budget-run/",
         thumbClass: "thumb-budget-run",
-        thumbUrl: "/assets/images/thumb-BudgetRun.png",
+        thumbUrl: "/assets/images/thumb-budget-run.png",
         tags: ["캐주얼", "액션"],
         color: "#ffd700"
     },
