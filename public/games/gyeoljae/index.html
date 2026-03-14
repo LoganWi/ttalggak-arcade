@@ -313,6 +313,7 @@
             constructor(x, z) {
                 this.x = x; this.y = FLOOR_Y; this.z = z;
                 this.cachedCanvas = SpriteCache.get('Cabinet', (ctx) => {
+                    ctx.translate(0, 500); // Fixed clipping: Move drawing 500px down to fit positive coordinate space
                     ctx.lineWidth = 6; ctx.strokeStyle = '#000';
                     ctx.fillStyle = '#450a0a'; ctx.fillRect(0, -500, 800, 500); ctx.strokeRect(0, -500, 800, 500);
                     ctx.fillStyle = '#2e0707';
@@ -347,7 +348,7 @@
                     ctx.fillStyle = '#475569'; ctx.fillRect(470, -130, 210, 110); ctx.strokeRect(470, -130, 210, 110);
                     ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(520, -75, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                     ctx.fillRect(600, -85, 40, 20); ctx.strokeRect(600, -85, 40, 20);
-                }, 800, 500);
+                }, 800, 510);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -362,19 +363,20 @@
             constructor() {
                 this.x = -450; this.y = FLOOR_Y; this.z = 5550;
                 this.cachedCanvas = SpriteCache.get('Plant', (ctx) => {
+                    ctx.translate(100, 250); // Fixed clipping: center the plant in a 200x300 canvas
                     ctx.lineWidth = 6; ctx.strokeStyle = '#000';
                     ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.moveTo(-40, 100); ctx.lineTo(40, 100); ctx.lineTo(50, 0); ctx.lineTo(-50, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
                     ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(0, -50, 60, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                     ctx.beginPath(); ctx.arc(-50, -80, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                     ctx.beginPath(); ctx.arc(50, -70, 55, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                     ctx.beginPath(); ctx.arc(0, -120, 50, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                }, 200, 300);
+                }, 200, 360);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
-                ctx.drawImage(this.cachedCanvas, -100, -200);
+                ctx.drawImage(this.cachedCanvas, -100, -250);
                 ctx.restore();
             }
         }
@@ -383,6 +385,7 @@
             constructor() {
                 this.x = 650; this.y = FLOOR_Y; this.z = 6900;
                 this.cachedCanvas = SpriteCache.get('GolfBag', (ctx) => {
+                    ctx.translate(75, 300); // Fixed clipping: center in 150x350 canvas
                     ctx.lineWidth = 6; ctx.strokeStyle = '#000';
                     ctx.fillStyle = '#b91c1c'; ctx.beginPath(); ctx.moveTo(-35, 300); ctx.lineTo(35, 300); ctx.lineTo(45, 100); ctx.lineTo(-25, 100); ctx.closePath(); ctx.fill(); ctx.stroke();
                     ctx.fillStyle = '#111'; ctx.fillRect(-25, 120, 70, 25); ctx.fillRect(-15, 220, 40, 50);
@@ -390,7 +393,7 @@
                     ctx.fillStyle = '#333'; ctx.fillRect(-20, 30, 16, 12); ctx.fillStyle = '#ccc'; ctx.fillRect(10, 50, 6, 50); ctx.strokeRect(10, 50, 6, 50);
                     ctx.fillStyle = '#333'; ctx.fillRect(5, 40, 16, 12); ctx.fillStyle = '#ccc'; ctx.fillRect(25, 70, 6, 30); ctx.strokeRect(25, 70, 6, 30);
                     ctx.fillStyle = '#333'; ctx.fillRect(20, 60, 16, 12);
-                }, 150, 350);
+                }, 150, 610);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
@@ -404,25 +407,30 @@
         class SideDesk {
             constructor(x, z, isLeft) {
                 this.x = x; this.y = FLOOR_Y + 120; this.z = z; this.isLeft = isLeft;
+                const id = isLeft ? 'SideDeskL' : 'SideDeskR';
+                this.cachedCanvas = SpriteCache.get(id, (ctx) => {
+                    ctx.translate(200, 150); // Center the desk and computer in a 400x300 canvas
+                    ctx.lineWidth = 6; ctx.strokeStyle = '#000';
+                    ctx.fillStyle = '#b0c4de'; ctx.fillRect(-150, -20, 300, 120); ctx.strokeRect(-150, -20, 300, 120);
+                    ctx.strokeRect(-130, 0, 260, 40); ctx.strokeRect(-130, 50, 260, 40);
+                    ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-80, -150, 160, 130); ctx.strokeRect(-80, -150, 160, 130);
+                    ctx.fillStyle = '#0ea5e9'; ctx.fillRect(-60, -130, 120, 90);
+                    ctx.fillStyle = '#bae6fd'; ctx.fillRect(-45, -110, 90, 10); ctx.fillRect(-45, -90, 60, 10); ctx.fillRect(-45, -70, 75, 10);
+                    ctx.fillStyle = '#cbd5e1'; ctx.fillRect(-70, -35, 140, 15); ctx.strokeRect(-70, -35, 140, 15);
+                    if (!this.isLeft) {
+                        ctx.fillStyle = '#d97706'; ctx.fillRect(90, -70, 50, 50); ctx.strokeRect(90, -70, 50, 50);
+                        ctx.fillStyle = '#22c55e'; ctx.fillRect(80, -140, 70, 70); ctx.strokeRect(80, -140, 70, 70);
+                    } else {
+                        ctx.fillStyle = '#ef4444'; ctx.fillRect(100, -80, 20, 60); ctx.strokeRect(100, -80, 20, 60);
+                        ctx.fillStyle = '#3b82f6'; ctx.fillRect(125, -70, 15, 50); ctx.strokeRect(125, -70, 15, 50);
+                    }
+                }, 400, 300);
             }
             draw() {
                 let p = project(this.x, this.y, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
-                ctx.lineWidth = 6; ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#b0c4de'; ctx.fillRect(-150, -20, 300, 120); ctx.strokeRect(-150, -20, 300, 120);
-                ctx.strokeRect(-130, 0, 260, 40); ctx.strokeRect(-130, 50, 260, 40);
-                ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-80, -150, 160, 130); ctx.strokeRect(-80, -150, 160, 130);
-                ctx.fillStyle = '#0ea5e9'; ctx.fillRect(-60, -130, 120, 90);
-                ctx.fillStyle = '#bae6fd'; ctx.fillRect(-45, -110, 90, 10); ctx.fillRect(-45, -90, 60, 10); ctx.fillRect(-45, -70, 75, 10);
-                ctx.fillStyle = '#cbd5e1'; ctx.fillRect(-70, -35, 140, 15); ctx.strokeRect(-70, -35, 140, 15);
-                if (!this.isLeft) {
-                    ctx.fillStyle = '#d97706'; ctx.fillRect(90, -70, 50, 50); ctx.strokeRect(90, -70, 50, 50);
-                    ctx.fillStyle = '#22c55e'; ctx.fillRect(80, -140, 70, 70); ctx.strokeRect(80, -140, 70, 70);
-                } else {
-                    ctx.fillStyle = '#ef4444'; ctx.fillRect(100, -80, 20, 60); ctx.strokeRect(100, -80, 20, 60);
-                    ctx.fillStyle = '#3b82f6'; ctx.fillRect(125, -70, 15, 50); ctx.strokeRect(125, -70, 15, 50);
-                }
+                ctx.drawImage(this.cachedCanvas, -200, -150);
                 ctx.restore();
             }
         }
@@ -431,6 +439,7 @@
             constructor() {
                 this.z = 5400;
                 this.cachedCanvas = SpriteCache.get('Desk', (ctx) => {
+                    ctx.translate(400, 100); // Fixed clipping: center the 700px wide desk in an 800px canvas
                     ctx.lineWidth = 8; ctx.strokeStyle = '#000';
                     ctx.fillStyle = '#526078'; ctx.fillRect(-350, 0, 700, 40); ctx.strokeRect(-350, 0, 700, 40);
                     ctx.fillStyle = '#404a5e'; ctx.fillRect(-330, 40, 660, 250); ctx.strokeRect(-330, 40, 660, 250);
@@ -442,13 +451,13 @@
                     ctx.fillStyle = '#2ecc71'; ctx.fillRect(-255, -70, 10, 30); ctx.strokeRect(-255, -70, 10, 30);
                     ctx.fillStyle = '#fff'; ctx.fillRect(180, -15, 90, 15); ctx.strokeRect(180, -15, 90, 15);
                     ctx.fillRect(195, -30, 60, 15); ctx.strokeRect(195, -30, 60, 15);
-                }, 750, 350);
+                }, 800, 400);
             }
             draw() {
                 let p = project(0, 0, this.z);
                 if (p.scale < 0) return;
                 ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(p.scale, p.scale);
-                ctx.drawImage(this.cachedCanvas, -375, -20);
+                ctx.drawImage(this.cachedCanvas, -400, -100);
                 ctx.restore();
             }
         }
