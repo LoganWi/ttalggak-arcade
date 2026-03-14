@@ -11,7 +11,7 @@ const gamesData = [
     desc: "팀장님, 이번 회식은 제발 치킨 말고 한우, 회, 오마카세... 이런 거 먹고 싶어요! 팀원들의 품격 있는 회식을 위해, 예산 따내러 달려라!",
     href: "/games/budget-run/",
     thumbClass: "thumb-budget-run",
-    thumbUrl: `/assets/thumb-budget-run.png?v=${Date.now()}`,
+    thumbUrl: "/assets/thumb-budget-run.png",
     tags: ["캐주얼", "액션"],
     color: "#ffd700",
   },
@@ -65,6 +65,17 @@ export default function Home() {
     setLoadedImages((prev) => ({ ...prev, [id]: true }));
   };
 
+  // Ensure images are marked as loaded if they are already in cache
+  useEffect(() => {
+    const images = document.querySelectorAll('.card-thumbnail-img');
+    images.forEach((img) => {
+      if (img.complete) {
+        const id = img.getAttribute('data-game-id');
+        if (id) handleImageLoad(id);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     async function fetchCounts() {
       const counts = {};
@@ -104,6 +115,7 @@ export default function Home() {
                 <img
                   src={game.thumbUrl}
                   alt={game.title}
+                  data-game-id={game.id}
                   className={`card-thumbnail-img ${loadedImages[game.id] ? "loaded" : ""}`}
                   onLoad={() => handleImageLoad(game.id)}
                 />
