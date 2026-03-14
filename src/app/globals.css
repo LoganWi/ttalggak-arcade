@@ -28,6 +28,19 @@ body {
   font-family: 'Outfit', 'Noto Sans KR', sans-serif;
   color: #fff;
   overflow-x: hidden;
+  /* GPU Hint */
+  transform: translateZ(0);
+}
+
+/* HIGH PERFORMANCE MODE: Simple background when game is active */
+body.game-active {
+  background: #000 !important;
+  background-image: none !important;
+}
+
+body.game-active::before,
+body.game-active::after {
+  display: none !important;
 }
 
 .lobby-overlay-stars {
