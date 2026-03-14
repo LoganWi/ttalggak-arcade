@@ -374,8 +374,8 @@
         }
     </style>
     <!-- Firebase & Leaderboard Script -->
-    <script src="../../firebase-config.js"></script>
-    <script type="module" src="../../api-leaderboard.js"></script>
+    <script src="..//firebase-config.js"></script>
+    <script type="module" src="/api-leaderboard.js"></script>
 </head>
 
 <body>
@@ -471,8 +471,8 @@
     </div>
 
     <script type="module">
-        import { trackPlayCount } from '../../api-playcount.js';
-        import { getUserId, getUserNickname, submitScore, getLeaderboard } from '../../api-leaderboard.js';
+        import { trackPlayCount } from '/api-playcount.js';
+        import { getUserId, getUserNickname, submitScore, getLeaderboard } from '/api-leaderboard.js';
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
