@@ -248,9 +248,12 @@
             canvas.width = width;
             canvas.height = height;
             ctx.imageSmoothingEnabled = false;
+            initRoomCache();
             if (state === 'idle' && !folder) initGame();
         }
         window.addEventListener('resize', resize);
+
+        let roomCacheCanvas = null;
 
         // Sprite Caching for static assets
         const SpriteCache = {
@@ -823,36 +826,41 @@
             }
         }
 
-        function drawRoomEnvironment() {
-            ctx.fillStyle = '#829bb5'; ctx.fillRect(0, 0, width, height / 2);
-            ctx.strokeStyle = '#627b95'; ctx.lineWidth = 2;
+        function initRoomCache() {
+            if (!roomCacheCanvas) roomCacheCanvas = document.createElement('canvas');
+            roomCacheCanvas.width = width;
+            roomCacheCanvas.height = height;
+            const cctx = roomCacheCanvas.getContext('2d');
+            cctx.imageSmoothingEnabled = false;
+
+            cctx.fillStyle = '#829bb5'; cctx.fillRect(0, 0, width, height / 2);
+            cctx.strokeStyle = '#627b95'; cctx.lineWidth = 2;
             for (let x = -4000; x <= 4000; x += 400) {
                 let p1 = project(x, CEILING_Y, -500); let p2 = project(x, CEILING_Y, 8000);
-                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { cctx.beginPath(); cctx.moveTo(p1.sx, p1.sy); cctx.lineTo(p2.sx, p2.sy); cctx.stroke(); }
             }
             for (let z = -200; z <= 8000; z += 400) {
                 let p1 = project(-4000, CEILING_Y, z); let p2 = project(4000, CEILING_Y, z);
-                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { cctx.beginPath(); cctx.moveTo(p1.sx, p1.sy); cctx.lineTo(p2.sx, p2.sy); cctx.stroke(); }
             }
-            ctx.fillStyle = '#5180a5'; ctx.fillRect(0, height / 2, width, height / 2);
-            ctx.strokeStyle = '#396383'; ctx.lineWidth = 2;
+            cctx.fillStyle = '#5180a5'; cctx.fillRect(0, height / 2, width, height / 2);
+            cctx.strokeStyle = '#396383'; cctx.lineWidth = 2;
             for (let x = -4000; x <= 4000; x += 300) {
                 let p1 = project(x, FLOOR_Y, -500); let p2 = project(x, FLOOR_Y, 8000);
-                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { cctx.beginPath(); cctx.moveTo(p1.sx, p1.sy); cctx.lineTo(p2.sx, p2.sy); cctx.stroke(); }
             }
             for (let z = -200; z <= 8000; z += 300) {
                 let p1 = project(-4000, FLOOR_Y, z); let p2 = project(4000, FLOOR_Y, z);
-                if (p1.scale > 0 && p2.scale > 0) { ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke(); }
+                if (p1.scale > 0 && p2.scale > 0) { cctx.beginPath(); cctx.moveTo(p1.sx, p1.sy); cctx.lineTo(p2.sx, p2.sy); cctx.stroke(); }
             }
             let gmTL = project(600, FLOOR_Y, 7200); let gmTR = project(800, FLOOR_Y, 7200);
             let gmBR = project(800, FLOOR_Y, 4800); let gmBL = project(600, FLOOR_Y, 4800);
             if (gmBL.scale > 0 && gmTL.scale > 0) {
-                ctx.save(); ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(gmTL.sx, gmTL.sy); ctx.lineTo(gmTR.sx, gmTR.sy); ctx.lineTo(gmBR.sx, gmBR.sy); ctx.lineTo(gmBL.sx, gmBL.sy); ctx.closePath(); ctx.fill();
-                let hole = project(700, FLOOR_Y, 6750); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(hole.sx, hole.sy, 20 * hole.scale, 6 * hole.scale, 0, 0, Math.PI * 2); ctx.fill();
-                let ball = project(700, FLOOR_Y, 5250); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-                ctx.restore();
+                cctx.save(); cctx.fillStyle = '#22c55e'; cctx.beginPath(); cctx.moveTo(gmTL.sx, gmTL.sy); cctx.lineTo(gmTR.sx, gmTR.sy); cctx.lineTo(gmBR.sx, gmBR.sy); cctx.lineTo(gmBL.sx, gmBL.sy); cctx.closePath(); cctx.fill();
+                let hole = project(700, FLOOR_Y, 6750); cctx.fillStyle = '#000'; cctx.beginPath(); cctx.ellipse(hole.sx, hole.sy, 20 * hole.scale, 6 * hole.scale, 0, 0, Math.PI * 2); cctx.fill();
+                let ball = project(700, FLOOR_Y, 5250); cctx.fillStyle = '#fff'; cctx.strokeStyle = '#000'; cctx.lineWidth = 2; cctx.beginPath(); cctx.arc(ball.sx, ball.sy, 6 * ball.scale, 0, Math.PI * 2); cctx.fill(); cctx.stroke();
+                cctx.restore();
             }
-            // 천장 형광등
             const lightZs = [500, 1800, 3500, 5500];
             const lightXs = [-600, 0, 600];
             for (let lz of lightZs) {
@@ -864,22 +872,25 @@
                         let lh = Math.max(4, 12 * la.scale);
                         let lx0 = Math.min(la.sx, lb.sx);
                         let ly0 = la.sy - lh / 2;
-                        ctx.save();
-                        // 형광등 몸체 (회색 케이스)
-                        ctx.fillStyle = '#b0bec5'; ctx.strokeStyle = '#546e7a'; ctx.lineWidth = 2;
-                        ctx.fillRect(lx0, ly0 - lh * 0.5, lw, lh * 1.5); ctx.strokeRect(lx0, ly0 - lh * 0.5, lw, lh * 1.5);
-                        // 형광 빛 (밝은 흰색/노란색)
-                        ctx.fillStyle = '#fffde7';
-                        ctx.fillRect(lx0 + 2, ly0, lw - 4, lh * 0.8);
-                        // 빛 번짐 효과
-                        let grad = ctx.createLinearGradient(lx0, ly0 + lh, lx0, ly0 + lh * 8);
+                        cctx.save();
+                        cctx.fillStyle = '#b0bec5'; cctx.strokeStyle = '#546e7a'; cctx.lineWidth = 2;
+                        cctx.fillRect(lx0, ly0 - lh * 0.5, lw, lh * 1.5); cctx.strokeRect(lx0, ly0 - lh * 0.5, lw, lh * 1.5);
+                        cctx.fillStyle = '#fffde7';
+                        cctx.fillRect(lx0 + 2, ly0, lw - 4, lh * 0.8);
+                        let grad = cctx.createLinearGradient(lx0, ly0 + lh, lx0, ly0 + lh * 8);
                         grad.addColorStop(0, 'rgba(255, 253, 200, 0.18)');
                         grad.addColorStop(1, 'rgba(255, 253, 200, 0)');
-                        ctx.fillStyle = grad;
-                        ctx.fillRect(lx0 - lw * 0.3, ly0 + lh, lw * 1.6, lh * 7);
-                        ctx.restore();
+                        cctx.fillStyle = grad;
+                        cctx.fillRect(lx0 - lw * 0.3, ly0 + lh, lw * 1.6, lh * 7);
+                        cctx.restore();
                     }
                 }
+            }
+        }
+
+        function drawRoomEnvironment() {
+            if (roomCacheCanvas) {
+                ctx.drawImage(roomCacheCanvas, 0, 0);
             }
         }
 

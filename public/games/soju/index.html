@@ -243,7 +243,7 @@
         <div id="panelGameover" class="panel hidden">
             <h1 class="text-4xl font-bold mb-4 text-red-400">FAIL</h1>
             <p id="failMessage" class="text-xl mb-4"></p>
-            <div class="mt-4 text-gray-400 text-base animate-pulse">화면을 터치하여 계속...</div>
+            <div id="failCountdown" class="mt-4 text-gray-400 text-base animate-pulse">화면을 터치하여 계속...</div>
         </div>
 
         <!-- 결과 요약 페이지 (새로 추가) -->
@@ -313,6 +313,7 @@
         const failMessage = document.getElementById('failMessage');
         const finalScore = document.getElementById('finalScore'); // This element is no longer in HTML, but kept for now.
         const topScoreInfo = document.getElementById('topScoreInfo');
+        const failCountdown = document.getElementById('failCountdown');
 
         // 게임 내부 해상도 (폭을 늘려 점수 UI와 전체적인 화면이 잘 담기도록 수정)
         const GAME_WIDTH = 220;
@@ -484,6 +485,8 @@
             }
         }
 
+        let failTimer = null;
+
         function gameOver(message) {
             state = 'GAMEOVER';
             failMessage.innerText = message;
@@ -497,8 +500,15 @@
 
             panelGameover.classList.remove('hidden');
 
+            let timeLeft = 5;
+            failCountdown.innerText = `화면을 터치하여 계속... ${timeLeft}`;
+
             // 화면 클릭 시 요약 또는 닉네임 창으로 이동하도록 이벤트 한 번만 등록
             const proceed = async () => {
+                if (failTimer) {
+                    clearInterval(failTimer);
+                    failTimer = null;
+                }
                 window.removeEventListener('mousedown', proceed);
                 window.removeEventListener('touchstart', proceed);
                 panelGameover.classList.add('hidden');
@@ -512,6 +522,15 @@
                     showResultsPanel();
                 }
             };
+
+            failTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    failCountdown.innerText = `화면을 터치하여 계속... ${timeLeft}`;
+                } else {
+                    proceed();
+                }
+            }, 1000);
 
             setTimeout(() => {
                 window.addEventListener('mousedown', proceed);
