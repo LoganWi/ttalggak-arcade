@@ -513,7 +513,7 @@
                 window.removeEventListener('touchstart', proceed);
                 panelGameover.classList.add('hidden');
 
-                const savedNickname = getUserNickname();
+                const savedNickname = getUserNickname('soju');
                 if (!savedNickname) {
                     showNicknamePanel();
                 } else {

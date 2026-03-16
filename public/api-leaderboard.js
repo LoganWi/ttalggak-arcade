@@ -14,20 +14,33 @@ export function getUserId() {
     return userId;
 }
 
-// 저장된 닉네임 가져오기
-export function getUserNickname() {
+// 저장된 닉네임 가져오기 (게임별 저장 지원)
+export function getUserNickname(gameId = '') {
+    // 1. 게임별 닉네임 먼저 확인
+    if (gameId) {
+        const gameNickname = localStorage.getItem(`${STORAGE_PREFIX}${gameId}_nickname`);
+        if (gameNickname) return gameNickname;
+    }
+
+    // 2. 없으면 기존 전역 닉네임 확인 (하위 호환성)
     return localStorage.getItem(STORAGE_PREFIX + 'nickname') || '';
 }
 
-// 닉네임 로컬에 저장하기
-export function setUserNickname(nickname) {
+// 닉네임 로컬에 저장하기 (게임별 저장 지원)
+export function setUserNickname(nickname, gameId = '') {
+    // 1. 전역 닉네임 저장 (기존 방식 유지)
     localStorage.setItem(STORAGE_PREFIX + 'nickname', nickname);
+
+    // 2. 게임별 닉네임도 따로 저장 (확장성)
+    if (gameId) {
+        localStorage.setItem(`${STORAGE_PREFIX}${gameId}_nickname`, nickname);
+    }
 }
 
 // 점수 서버에 등록하기
 export async function submitScore(gameId, nickname, score) {
     const userId = getUserId();
-    setUserNickname(nickname);
+    setUserNickname(nickname, gameId);
 
     try {
         // leaderboards_{gameId} 컬렉션에 userId를 문서 ID로 사용하여 저장

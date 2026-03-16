@@ -804,7 +804,7 @@
         async function proceedToRanking() {
             container.classList.remove('screen-shake');
 
-            const savedNickname = getUserNickname();
+            const savedNickname = getUserNickname('budget-run');
             if (!savedNickname) {
                 // 1. 유저가 닉네임을 등록하지 않은 경우
                 showNicknamePanel();
