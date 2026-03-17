@@ -74,20 +74,35 @@ export default function Home() {
         if (id) handleImageLoad(id);
       }
     });
+
+    // MULTI-TAB OPTIMIZATION: Pause animations when tab is inactive
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        document.body.classList.add('is-hidden');
+      } else {
+        document.body.classList.remove('is-hidden');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   useEffect(() => {
     async function fetchCounts() {
-      const counts = {};
-      for (const game of gamesData) {
-        try {
+      try {
+        // Parallel fetching to reduce network bottleneck
+        const fetchPromises = gamesData.map(async (game) => {
           const count = await getPlayCount(game.id);
-          counts[game.id] = count;
-        } catch (error) {
-          console.error(`Failed to fetch count for ${game.id}`, error);
-        }
+          return [game.id, count];
+        });
+
+        const results = await Promise.all(fetchPromises);
+        const counts = Object.fromEntries(results);
+        setPlayCounts(counts);
+      } catch (error) {
+        console.error("Failed to fetch play counts", error);
       }
-      setPlayCounts(counts);
     }
     fetchCounts();
   }, []);
