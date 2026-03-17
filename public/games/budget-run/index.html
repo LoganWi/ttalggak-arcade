@@ -9,370 +9,370 @@
     <link href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
     <!-- Iconify 아이콘 추가 -->
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <!-- 랭킹 시스템 연동 (v3 초기화 반영) -->
-    <script src="../firebase-config.js"></script>
-    html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #05050a;
-    /* 게임 밖의 배경 (어둡게) */
-    font-family: 'Galmuri11', 'Galmuri9', sans-serif;
-    overflow: hidden;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    }
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #05050a;
+            /* 게임 밖의 배경 (어둡게) */
+            font-family: 'Galmuri11', 'Galmuri9', sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    /* 게임 화면 컨테이너 (세로 비율 고정) */
-    #gameContainer {
-    position: relative;
-    width: 100%;
-    /* 자바스크립트로 계산된 실제 가용 높이 사용 (--vh) */
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
-    max-width: 420px;
-    /* 모바일 폭 고정 */
-    background-color: #1a1a2e;
-    overflow: hidden;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 1);
-    border-left: 1px solid #333;
-    border-right: 1px solid #333;
-    }
+        /* 게임 화면 컨테이너 (세로 비율 고정) */
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            /* 자바스크립트로 계산된 실제 가용 높이 사용 (--vh) */
+            height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
+            max-width: 420px;
+            /* 모바일 폭 고정 */
+            background-color: #1a1a2e;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+            border-left: 1px solid #333;
+            border-right: 1px solid #333;
+        }
 
-    canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
-    /* CRT 스캔라인 효과 (레트로 감성) */
-    .scanlines {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom,
-    rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 0) 50%,
-    rgba(0, 0, 0, 0.1) 50%,
-    rgba(0, 0, 0, 0.1));
-    background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 10;
-    }
+        /* CRT 스캔라인 효과 (레트로 감성) */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0) 50%,
+                    rgba(0, 0, 0, 0.1) 50%,
+                    rgba(0, 0, 0, 0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
 
-    /* 몽환적인 사이버펑크/신스웨이브 비네팅 효과 */
-    .vignette {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.7) 100%);
-    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
-    pointer-events: none;
-    z-index: 15;
-    }
+        /* 몽환적인 사이버펑크/신스웨이브 비네팅 효과 */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.7) 100%);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 15;
+        }
 
-    /* UI 요소들 */
-    #uiLayer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    }
+        /* UI 요소들 */
+        #uiLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-    #topBar {
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    text-shadow: 2px 2px 0 #000;
-    }
+        #topBar {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            text-shadow: 2px 2px 0 #000;
+        }
 
-    #budgetDisplay {
-    color: #ffd700;
-    font-size: 1.5rem;
-    line-height: 1.2;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    }
+        #budgetDisplay {
+            color: #ffd700;
+            font-size: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
 
-    #budgetDisplay span {
-    font-size: 0.8rem;
-    color: #fff;
-    display: block;
-    margin-bottom: 5px;
-    }
+        #budgetDisplay span {
+            font-size: 0.8rem;
+            color: #fff;
+            display: block;
+            margin-bottom: 5px;
+        }
 
-    #distanceDisplay {
-    color: #00ffcc;
-    font-size: 1.2rem;
-    text-align: right;
-    }
+        #distanceDisplay {
+            color: #00ffcc;
+            font-size: 1.2rem;
+            text-align: right;
+        }
 
-    /* 인트로 & 오버 화면 */
-    .screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 30;
-    text-align: center;
-    pointer-events: auto;
-    padding: 50px 20px 30px 20px;
-    box-sizing: border-box;
-    }
+        /* 인트로 & 오버 화면 */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 30;
+            text-align: center;
+            pointer-events: auto;
+            padding: 50px 20px 30px 20px;
+            box-sizing: border-box;
+        }
 
-    #introScreen {
-    background: rgba(40, 20, 15, 0.5);
-    justify-content: flex-start;
-    padding-top: 15vh;
-    }
+        #introScreen {
+            background: rgba(40, 20, 15, 0.5);
+            justify-content: flex-start;
+            padding-top: 15vh;
+        }
 
-    .game-title {
-    color: #ffffff;
-    font-size: 3.8rem;
-    margin: 0 0 20px 0;
-    line-height: 1.1;
-    transform: rotate(-3deg);
-    text-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900, 4px 4px 0 #cc0000, 0 0 40px #cc0000;
-    letter-spacing: -2px;
-    }
+        .game-title {
+            color: #ffffff;
+            font-size: 3.8rem;
+            margin: 0 0 20px 0;
+            line-height: 1.1;
+            transform: rotate(-3deg);
+            text-shadow: 0 0 10px #ff9900, 0 0 20px #ff9900, 4px 4px 0 #cc0000, 0 0 40px #cc0000;
+            letter-spacing: -2px;
+        }
 
-    .speech-bubble {
-    background: #fff;
-    color: #000;
-    padding: 15px 20px;
-    border-radius: 10px;
-    border: 4px solid #000;
-    position: relative;
-    /* 말풍선이 타이틀 바로 아래에 붙도록 margin-top을 0으로 수정 */
-    margin-top: 0;
-    margin-bottom: 140px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    line-height: 1.5;
-    box-shadow: 4px 4px 0 rgba(0, 255, 204, 0.6);
-    }
+        .speech-bubble {
+            background: #fff;
+            color: #000;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 4px solid #000;
+            position: relative;
+            /* 말풍선이 타이틀 바로 아래에 붙도록 margin-top을 0으로 수정 */
+            margin-top: 0;
+            margin-bottom: 140px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1.5;
+            box-shadow: 4px 4px 0 rgba(0, 255, 204, 0.6);
+        }
 
-    .speech-bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 15px 15px 0;
-    border-style: solid;
-    border-color: #fff transparent transparent transparent;
-    z-index: 1;
-    }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: #fff transparent transparent transparent;
+            z-index: 1;
+        }
 
-    .speech-bubble::before {
-    content: '';
-    position: absolute;
-    bottom: -22px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 20px 20px 0;
-    border-style: solid;
-    border-color: #000 transparent transparent transparent;
-    z-index: 0;
-    }
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 20px 20px 0;
+            border-style: solid;
+            border-color: #000 transparent transparent transparent;
+            z-index: 0;
+        }
 
-    .btn {
-    background-color: #00ffcc;
-    color: #000;
-    border: 4px solid #fff;
-    padding: 15px 30px;
-    font-size: 1.5rem;
-    font-family: inherit;
-    cursor: pointer;
-    text-transform: uppercase;
-    box-shadow: 4px 4px 0 #000;
-    transition: transform 0.1s;
-    margin-bottom: 20px;
-    }
+        .btn {
+            background-color: #00ffcc;
+            color: #000;
+            border: 4px solid #fff;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0 #000;
+            transition: transform 0.1s;
+            margin-bottom: 20px;
+        }
 
-    .btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0 0 0 #000;
-    }
+        .btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 #000;
+        }
 
-    #gameOverScreen {
-    background: rgba(0, 0, 0, 0.85);
-    justify-content: center;
-    }
+        #gameOverScreen {
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+        }
 
-    #gameOverScreen h1 {
-    color: #ff3366;
-    font-size: 2.5rem;
-    text-shadow: 4px 4px 0 #000;
-    margin-bottom: 20px;
-    }
+        #gameOverScreen h1 {
+            color: #ff3366;
+            font-size: 2.5rem;
+            text-shadow: 4px 4px 0 #000;
+            margin-bottom: 20px;
+        }
 
-    /* 랭킹 관련 UI 스크린 공통 스타일 */
-    .ranking-panel {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 400px;
-    background-color: rgba(5, 5, 10, 0.95);
-    border: 4px solid #ff3366;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    display: none;
-    /* 기본 숨김 */
-    flex-direction: column;
-    align-items: center;
-    z-index: 1000;
-    /* 모바일 스크롤 및 터치 허용 */
-    touch-action: auto !important;
-    user-select: text !important;
-    }
+        /* 랭킹 관련 UI 스크린 공통 스타일 */
+        .ranking-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background-color: rgba(5, 5, 10, 0.95);
+            border: 4px solid #ff3366;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+            /* 기본 숨김 */
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+            /* 모바일 스크롤 및 터치 허용 */
+            touch-action: auto !important;
+            user-select: text !important;
+        }
 
-    .ranking-panel h2 {
-    color: #ffd700;
-    margin-top: 0;
-    font-size: 1.5rem;
-    text-shadow: 2px 2px 0 #000;
-    }
+        .ranking-panel h2 {
+            color: #ffd700;
+            margin-top: 0;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0 #000;
+        }
 
-    .ranking-panel input {
-    font-family: inherit;
-    font-size: 1.2rem;
-    padding: 10px;
-    width: 80%;
-    margin-bottom: 15px;
-    text-align: center;
-    border: 2px solid #333;
-    background-color: #222;
-    color: #fff;
-    outline: none;
-    /* 모바일 포커싱 허용 */
-    user-select: text !important;
-    -webkit-user-select: text !important;
-    }
+        .ranking-panel input {
+            font-family: inherit;
+            font-size: 1.2rem;
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 15px;
+            text-align: center;
+            border: 2px solid #333;
+            background-color: #222;
+            color: #fff;
+            outline: none;
+            /* 모바일 포커싱 허용 */
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
 
-    .ranking-panel input:focus {
-    border-color: #ff3366;
-    }
+        .ranking-panel input:focus {
+            border-color: #ff3366;
+        }
 
-    @keyframes shake {
-    0% {
-    transform: translate(1px, 1px) rotate(0deg);
-    }
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
 
-    10% {
-    transform: translate(-1px, -2px) rotate(-1deg);
-    }
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
 
-    20% {
-    transform: translate(-3px, 0px) rotate(1deg);
-    }
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
 
-    30% {
-    transform: translate(3px, 2px) rotate(0deg);
-    }
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
 
-    40% {
-    transform: translate(1px, -1px) rotate(1deg);
-    }
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
 
-    50% {
-    transform: translate(-1px, 2px) rotate(-1deg);
-    }
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
 
-    60% {
-    transform: translate(-3px, 1px) rotate(0deg);
-    }
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
 
-    70% {
-    transform: translate(3px, 1px) rotate(-1deg);
-    }
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
 
-    80% {
-    transform: translate(-1px, -1px) rotate(1deg);
-    }
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
 
-    90% {
-    transform: translate(1px, 2px) rotate(0deg);
-    }
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
 
-    100% {
-    transform: translate(1px, -2px) rotate(-1deg);
-    }
-    }
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
 
-    .screen-shake {
-    animation: shake 0.5s;
-    animation-iteration-count: infinite;
-    }
+        .screen-shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
 
-    .leaderboard-list {
-    width: 100%;
-    max-height: 250px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    text-align: left;
-    /* 스크롤 가시성 및 터치 허용 */
-    touch-action: auto !important;
-    -webkit-overflow-scrolling: touch;
-    }
+        .leaderboard-list {
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            text-align: left;
+            /* 스크롤 가시성 및 터치 허용 */
+            touch-action: auto !important;
+            -webkit-overflow-scrolling: touch;
+        }
 
-    .rank-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 5px;
-    border-bottom: 1px solid #333;
-    color: #fff;
-    font-size: 1.1rem;
-    align-items: center;
-    }
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 5px;
+            border-bottom: 1px solid #333;
+            color: #fff;
+            font-size: 1.1rem;
+            align-items: center;
+        }
 
-    .rank-item.my-rank {
-    background-color: rgba(255, 215, 0, 0.2);
-    /* 강조 */
-    border-radius: 4px;
-    }
+        .rank-item.my-rank {
+            background-color: rgba(255, 215, 0, 0.2);
+            /* 강조 */
+            border-radius: 4px;
+        }
 
-    .rank-number {
-    font-weight: bold;
-    color: #ffcc00;
-    width: 30px;
-    }
+        .rank-number {
+            font-weight: bold;
+            color: #ffcc00;
+            width: 30px;
+        }
 
-    .rank-name {
-    flex-grow: 1;
-    margin-left: 10px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    }
+        .rank-name {
+            flex-grow: 1;
+            margin-left: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-    .rank-score {
-    font-weight: bold;
-    color: #00ffcc;
-    }
+        .rank-score {
+            font-weight: bold;
+            color: #00ffcc;
+        }
     </style>
     <!-- Firebase & Leaderboard Script -->
     <script src="../firebase-config.js"></script>
