@@ -317,12 +317,13 @@ header {
   z-index: 50;
 }
 
-/* MOBILE OPTIMIZATION: Disable 3D transforms to prevent scroll lag */
+/* MOBILE LITE MODE: Purely 2D, no will-change, no translateZ */
 @media (max-width: 768px),
 (pointer: coarse) {
   .game-card.active {
     transform: none !important;
-    backface-visibility: visible;
+    will-change: auto !important;
+    backface-visibility: visible !important;
   }
 
   .game-card.active:hover {
@@ -368,6 +369,14 @@ header {
   transform: scale(1.06);
 }
 
+/* MOBILE: Disable hover scaling */
+@media (max-width: 768px),
+(pointer: coarse) {
+  .game-card.active:hover .card-thumbnail-img {
+    transform: none !important;
+  }
+}
+
 .skeleton-bg {
   background: rgba(255, 255, 255, 0.05);
   position: relative;
@@ -388,6 +397,14 @@ header {
       rgba(255, 255, 255, 0.08) 60%,
       rgba(255, 255, 255, 0));
   animation: shimmer 1.5s infinite;
+}
+
+/* MOBILE LITE MODE: Disable shimmer animation */
+@media (max-width: 768px),
+(pointer: coarse) {
+  .skeleton-bg::after {
+    display: none !important;
+  }
 }
 
 @keyframes shimmer {
