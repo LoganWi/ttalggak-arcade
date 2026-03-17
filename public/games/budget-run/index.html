@@ -947,6 +947,11 @@
             }, 1000);
         }
 
+        function addTrailPoint() {
+            trail.push({ x: player.x, worldY: cameraY });
+            if (trail.length > 25) trail.shift();
+        }
+
         function handleInput(e) {
             // 버튼, 링크, 입력창, 혹은 랭킹 패널 자체를 클릭/터치한 경우에는 게임 입력을 처리하지 않고 return
             // 특히 .ranking-panel을 제외해야 모바일에서 스크롤(터치 이동)이 브라우저 기본 동작으로 작동함
@@ -957,6 +962,13 @@
                 e.target.closest('textarea') ||
                 e.target.closest('.ranking-panel')
             )) return;
+
+            // 랭킹 패널이 열려있는 동안에는 게임 오버 후에도 터치 입력을 처리하지 않음 (스크롤 방해 금지)
+            if (panelNickname.style.display === 'flex' ||
+                panelResults.style.display === 'flex' ||
+                panelLeaderboard.style.display === 'flex') {
+                return;
+            }
 
             if (e && e.cancelable) e.preventDefault();
             if (gameState !== 'PLAYING') return;
