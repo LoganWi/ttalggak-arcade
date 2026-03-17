@@ -179,21 +179,7 @@ header {
   opacity: 0.6;
 }
 
-/* MOBILE OPTIMIZATION: Keep it simple but still looks good */
-@media (max-width: 768px),
-(pointer: coarse) {
-  .logo-title {
-    background: linear-gradient(to bottom, #fff, #00fff9);
-    -webkit-background-clip: text;
-    background-clip: text;
-    filter: drop-shadow(0 0 5px rgba(0, 255, 249, 0.5));
-  }
-
-  .logo-title::before,
-  .logo-title::after {
-    display: none;
-  }
-}
+/* MOBILE OPTIMIZATION: Removed simplification to match PC's premium logo */
 
 @keyframes glitch-anim {
 
