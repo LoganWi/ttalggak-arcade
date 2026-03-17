@@ -63,31 +63,11 @@ body.game-active * {
 }
 
 .lobby-overlay-grid {
-  content: '';
-  position: fixed;
-  bottom: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-  transform: perspective(600px) rotateX(65deg) translateY(0);
-  animation: gridMove 15s linear infinite;
-  pointer-events: none;
-  z-index: 0;
-  mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%);
+  display: none !important;
 }
 
 @keyframes gridMove {
-  0% {
-    transform: perspective(500px) rotateX(60deg) translateY(0);
-  }
-
-  100% {
-    transform: perspective(500px) rotateX(60deg) translateY(50px);
-  }
+  /* Removed - Grid is now hidden */
 }
 
 /* MOBILE LITE MODE: Completely Hide heavy fixed backgrounds */
@@ -203,54 +183,71 @@ header {
 
 @keyframes glitch-anim {
 
+  /* 0% to 90% is static to save GPU */
   0%,
-  100% {
+  90% {
     clip: rect(40px, 9999px, 42px, 0);
     transform: translateX(0);
+    opacity: 0;
   }
 
-  20% {
+  91% {
     clip: rect(20px, 9999px, 20px, 0);
     transform: translateX(1px);
+    opacity: 0.9;
   }
 
-  40% {
+  93% {
     clip: rect(60px, 9999px, 80px, 0);
     transform: translateX(-1px);
   }
 
-  60% {
+  95% {
     clip: rect(10px, 9999px, 15px, 0);
     transform: translateX(1px);
   }
 
-  80% {
+  97% {
     clip: rect(80px, 9999px, 90px, 0);
     transform: translateX(-1px);
+  }
+
+  100% {
+    clip: rect(40px, 9999px, 42px, 0);
+    transform: translateX(0);
+    opacity: 0;
   }
 }
 
 @keyframes glitch-anim2 {
 
   0%,
-  100% {
+  92% {
     clip: rect(10px, 9999px, 100px, 0);
     transform: translateX(0);
+    opacity: 0;
   }
 
-  25% {
+  93% {
     clip: rect(0px, 9999px, 5px, 0);
     transform: translateX(-1px);
+    opacity: 0.9;
   }
 
-  50% {
+  95% {
     clip: rect(50px, 9999px, 55px, 0);
     transform: translateX(1px);
   }
 
-  75% {
+  98% {
     clip: rect(80px, 9999px, 85px, 0);
     transform: translateX(-1px);
+  }
+
+  100% {
+    clip: rect(10px, 9999px, 100px, 0);
+    transform: translateX(0);
+    opacity: 0;
   }
 }
 
