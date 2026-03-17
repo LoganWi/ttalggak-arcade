@@ -816,13 +816,13 @@
         async function proceedToRanking() {
             container.classList.remove('screen-shake');
 
-            const savedNickname = getUserNickname('budget-run');
+            const savedNickname = getUserNickname('budget-run-v2');
             if (!savedNickname) {
                 // 1. 유저가 닉네임을 등록하지 않은 경우
                 showNicknamePanel();
             } else {
                 // 2. 유저가 닉네임을 등록한 경우 바로 제출 후 결과 페이지 랜딩 (서버에서 최고기록 비교 후 갱신)
-                await submitScore('budget-run', savedNickname, budget);
+                await submitScore('budget-run-v2', savedNickname, budget);
                 showResultPanel();
             }
         }
@@ -832,7 +832,7 @@
             inputNickname.value = '';
             nickPotentialRank.innerText = '계산 중...';
             // 랭킹 계산 범위를 500개로 확대하여 점수 보임 보장
-            getLeaderboard('budget-run', 500).then(data => {
+            getLeaderboard('budget-run-v2', 500).then(data => {
                 let myRank = 1;
                 if (data.length > 0) {
                     const betterScores = data.filter(item => item.score > Math.max(budget, bestScore));
@@ -854,7 +854,7 @@
             panelResults.style.display = 'flex';
             introScreen.style.display = 'none';
             // 랭킹 계산 범위를 500개로 확대
-            getLeaderboard('budget-run', 500).then(data => {
+            getLeaderboard('budget-run-v2', 500).then(data => {
                 let myRank = 1;
                 if (data.length > 0) {
                     const betterScores = data.filter(item => item.score > Math.max(budget, bestScore));
@@ -873,7 +873,7 @@
 
         async function loadLeaderboard() {
             leaderboardList.innerHTML = '<p style="color:#aaa;">데이터 불러오는 중...</p>';
-            const data = await getLeaderboard('budget-run');
+            const data = await getLeaderboard('budget-run-v2');
 
             if (data.length === 0) {
                 leaderboardList.innerHTML = '<p style="color:#aaa;">등록된 랭킹이 없습니다.</p>';
@@ -901,7 +901,7 @@
             btnSubmitScore.disabled = true;
             btnSubmitScore.innerText = '등록 중...';
 
-            const success = await submitScore('budget-run', nickname, budget);
+            const success = await submitScore('budget-run-v2', nickname, budget);
 
             btnSubmitScore.disabled = false;
             btnSubmitScore.innerText = '등록하기';
@@ -947,14 +947,16 @@
             }, 1000);
         }
 
-        function addTrailPoint() {
-            trail.push({ x: player.x, worldY: cameraY });
-            if (trail.length > 25) trail.shift();
-        }
-
         function handleInput(e) {
-            // 버튼, 링크, 혹은 입력창(input)을 클릭한 경우에는 게임 입력을 처리하지 않고 return (포커싱 방해 금지)
-            if (e && (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('textarea'))) return;
+            // 버튼, 링크, 입력창, 혹은 랭킹 패널 자체를 클릭/터치한 경우에는 게임 입력을 처리하지 않고 return
+            // 특히 .ranking-panel을 제외해야 모바일에서 스크롤(터치 이동)이 브라우저 기본 동작으로 작동함
+            if (e && (
+                e.target.closest('button') ||
+                e.target.closest('a') ||
+                e.target.closest('input') ||
+                e.target.closest('textarea') ||
+                e.target.closest('.ranking-panel')
+            )) return;
 
             if (e && e.cancelable) e.preventDefault();
             if (gameState !== 'PLAYING') return;
@@ -993,7 +995,7 @@
         // Initialize top score display on intro screen
         async function fetchIntroTopScore() {
             try {
-                const data = await getLeaderboard('budget-run', 1);
+                const data = await getLeaderboard('budget-run-v2', 1);
                 const introTopScore = document.getElementById('introTopScore');
                 if (data && data.length > 0) {
                     introTopScore.innerText = `현재 1위: ${data[0].nickname} (₩ ${data[0].score.toLocaleString()})`;
