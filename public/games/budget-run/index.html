@@ -247,6 +247,9 @@
             flex-direction: column;
             align-items: center;
             z-index: 1000;
+            /* 모바일 스크롤 및 터치 허용 */
+            touch-action: auto !important;
+            user-select: text !important;
         }
 
         .ranking-panel h2 {
@@ -333,6 +336,9 @@
             overflow-y: auto;
             margin-bottom: 20px;
             text-align: left;
+            /* 스크롤 가시성 및 터치 허용 */
+            touch-action: auto !important;
+            -webkit-overflow-scrolling: touch;
         }
 
         .rank-item {
@@ -371,7 +377,7 @@
         }
     </style>
     <!-- Firebase & Leaderboard Script -->
-    <script src="..//firebase-config.js"></script>
+    <script src="../firebase-config.js"></script>
     <script type="module" src="/api-leaderboard.js"></script>
 </head>
 
@@ -825,8 +831,8 @@
             panelNickname.style.display = 'flex';
             inputNickname.value = '';
             nickPotentialRank.innerText = '계산 중...';
-
-            getLeaderboard('budget-run', 100).then(data => {
+            // 랭킹 계산 범위를 500개로 확대하여 점수 보임 보장
+            getLeaderboard('budget-run', 500).then(data => {
                 let myRank = 1;
                 if (data.length > 0) {
                     const betterScores = data.filter(item => item.score > Math.max(budget, bestScore));
@@ -847,8 +853,8 @@
 
             panelResults.style.display = 'flex';
             introScreen.style.display = 'none';
-
-            getLeaderboard('budget-run', 100).then(data => {
+            // 랭킹 계산 범위를 500개로 확대
+            getLeaderboard('budget-run', 500).then(data => {
                 let myRank = 1;
                 if (data.length > 0) {
                     const betterScores = data.filter(item => item.score > Math.max(budget, bestScore));
