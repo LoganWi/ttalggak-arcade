@@ -376,7 +376,17 @@
     </style>
     <!-- Firebase & Leaderboard Script -->
     <script src="../firebase-config.js"></script>
-    <script type="module" src="/api-leaderboard.js"></script>
+    <script type="module">
+        import {
+            getUserId, getUserNickname, setUserNickname, submitScore, getLeaderboard, getUserScore
+        } from '/api-leaderboard.js';
+        window.getUserId = getUserId;
+        window.getUserNickname = getUserNickname;
+        window.setUserNickname = setUserNickname;
+        window.submitScore = submitScore;
+        window.getLeaderboard = getLeaderboard;
+        window.getUserScore = getUserScore;
+    </script>
 </head>
 
 <body>
@@ -749,13 +759,28 @@
 
         window.addEventListener('resize', resize);
 
-        function initGame() {
+        async function initGame() {
             cameraY = 0;
-            // 난이도 빌드업을 위해 초기 속도를 6.0에서 4.5로 대폭 낮춤 (여유 확보)
-            baseSpeed = 4.5;
-            direction = 1;
             budget = 0;
             distance = 0;
+            direction = 1;
+
+            // --- 서버 데이터와 동기화 (UUID 기반) ---
+            const serverData = await getUserScore('budget-run-v3');
+            if (serverData) {
+                // 서버에 기록이 있으면 로컬 기록 최신화
+                if (serverData.score > bestScore) {
+                    bestScore = serverData.score;
+                    localStorage.setItem('budget-run-v3_bestScore', bestScore);
+                }
+                // 서버 닉네임이 있으면 로컬에 저장 (다음 게임 시 자동 사용 위함)
+                if (serverData.nickname) {
+                    setUserNickname(serverData.nickname, 'budget-run-v3');
+                }
+            }
+
+            // 난이도 빌드업을 위해 초기 속도를 6.0에서 4.5로 대폭 낮춤 (여유 확보)
+            baseSpeed = 4.5;
             items = [];
             obstacles = [];
             trail = [];
@@ -794,7 +819,7 @@
         }
 
         function startGame() {
-            trackPlayCount('budget-run', true);
+            trackPlayCount('budget-run-v3', true);
             isSubmitted = false;
             introScreen.style.display = 'none';
             panelNickname.style.display = 'none';
@@ -806,8 +831,8 @@
         }
         window.startGame = startGame;
 
-        function resetAndStart() {
-            initGame();
+        async function resetAndStart() {
+            await initGame();
             startGame();
         }
 
@@ -1523,10 +1548,14 @@
         window.addEventListener('resize', updateViewportHeight);
         updateViewportHeight();
 
-        resize();
-        initGame();
-        gameState = 'START';
-        requestAnimationFrame(loop);
+        // 비동기 초기화 호출
+        (async () => {
+            resize();
+            await initGame();
+            gameState = 'START';
+            fetchIntroTopScore();
+            requestAnimationFrame(loop);
+        })();
 
     </script>
 </body>

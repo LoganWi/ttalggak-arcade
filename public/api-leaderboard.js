@@ -133,3 +133,20 @@ export async function getLeaderboard(gameId, limitNum = 20) {
         return [];
     }
 }
+
+// 특정 사용자의 최고 점수 가져오기 (UUID 기준)
+export async function getUserScore(gameId) {
+    const userId = getUserId();
+    try {
+        const scoreRef = doc(db, `leaderboards_${gameId}`, userId);
+        const docSnap = await getDoc(scoreRef);
+
+        if (docSnap.exists()) {
+            return docSnap.data();
+        }
+        return null;
+    } catch (error) {
+        console.error("사용자 점수 로드 실패:", error);
+        return null;
+    }
+}
