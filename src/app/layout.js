@@ -4,6 +4,27 @@ import "./globals.css";
 export const metadata = {
   title: "딸깍아케이드 (Ttalggak Arcade) - 하이퍼캐주얼 게임 허브",
   description: "심심할 때 즐기는 가벼운 웹 게임 모음",
+  openGraph: {
+    title: "딸깍아케이드 (Ttalggak Arcade)",
+    description: "심심할 때 즐기는 가벼운 웹 게임 모음",
+    url: "https://ttalggak-arcade.vercel.app/",
+    siteName: "딸깍아케이드",
+    images: [
+      {
+        url: "https://ttalggak-arcade.vercel.app/assets/thumb-main.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "딸깍아케이드 (Ttalggak Arcade)",
+    description: "심심할 때 즐기는 가벼운 웹 게임 모음",
+    images: ["https://ttalggak-arcade.vercel.app/assets/thumb-main.png"],
+  },
 };
 
 export default function RootLayout({ children }) {
